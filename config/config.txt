@@ -1,0 +1,4 @@
+LINCSPATH=/Users/rhodos/Desktop/Dropbox/LINCS/code/dgc_predict/
+DATAPATH=/Users/rhodos/Desktop/Dropbox/LINCS/data/
+RESULTSPATH=/Users/rhodos/Desktop/Dropbox/LINCS/data/results/tsize/
+MTLABPATH=/Applications/MATLAB_R2016a.app/bin/matlab

@@ -1,4 +1,0 @@
-LINCSPATH=/Users/rhodos/Desktop/Dropbox/LINCS/code/lincs/
-DATAPATH=/Users/rhodos/Desktop/Dropbox/LINCS/data/
-RESULTSPATH=/Users/rhodos/Desktop/Dropbox/LINCS/data/results/d6_24hr/
-MTLABPATH=/Applications/MATLAB_R2016a.app/bin/matlab

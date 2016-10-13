@@ -1,5 +1,3 @@
-source('R/dataprocessing/DataProc.R')
-
 TestGetLincsAnnot <- function(){
   L = GetLincsAnnot()
   stopifnot(nrow(L) == 20452)

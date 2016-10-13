@@ -16,6 +16,10 @@ PlotDir <- function(file, subdir=NULL){
   return(paste(plotDir, file, sep='/'))
 }
 
+BaseDir <- function(){
+  return(GetConfig("LINCSPATH"))
+}
+
 GetConfig <- function(key){
   a <- system("cat config/config.txt;", intern=T)
   b <- unlist(strsplit(a,"="))
@@ -28,7 +32,7 @@ DateStr <- function(){
 
 CheckDir <- function(){
   dirs <- unlist(strsplit(getwd(), "/"))
-  stopifnot(identical(dirs[length(dirs)], 'lincs'))
+  stopifnot(identical(dirs[length(dirs)], 'dgc_predict'))
 }
 
 DataDir <- function(subdir=''){
@@ -207,6 +211,35 @@ ZScore <- function(x){
 
 #### data frame helper functions ###################################################################
 
+FixNAStrings <- function(df, printFlag=FALSE){
+  for(i in 1:ncol(df)){
+    idx <- which(df[,i] == 'NA')
+    df[idx,i] <- NA
+    if(printFlag){
+      print(sprintf('fix na strings %d',i))
+      print(idx)
+    }
+  }
+  return(df)
+}
+
+ChangeColumnName <- function(df, from, to){
+  
+  stopifnot(length(from) == length(to))
+  if(length(from) > 1){
+    for(i in 1:length(from)){
+      df <- ChangeColumnName(df, from[i], to[i])
+    }
+  }
+  
+  idx <- which(names(df) == from)
+  if(length(idx) != 1){
+    warning(sprintf('found %d column name matches for %s', length(idx), from))
+  }
+  names(df)[idx] <- to
+  return(df)
+}
+
 RemoveDfColumns <- function(df, columnNames){
   stopifnot(all(columnNames %in% names(df)))
   idx <- which(names(df) %in% columnNames)
@@ -217,6 +250,12 @@ RemoveDfRows <- function(df, rowNames){
   stopifnot(all(rowNames %in% rownames(df)))
   idx <- which(rownames(df) %in% rowNames)
   return(df[-idx,])
+}
+
+Factor2Char <- function(df){
+  idx <- sapply(df, is.factor)
+  df[idx] <- lapply(df[idx], as.character)
+  return(df)
 }
 
 RemoveDuplicateRowsMulti <- function(df, colNames){
@@ -403,6 +442,48 @@ IsSymmetric <- function(A, thresh=1e-12){
 
 Norm2 <- function(x, na.rm=TRUE){
   return(sqrt(sum(x^2, na.rm=na.rm)))
+}
+
+VectorCompare <- function(x, y, normThresh=1e-12, maxThresh=NULL){
+  isSame <- TRUE
+  if((length(x) != length(y)) || (is.na(x) != is.na(y)) || 
+       class(x) != class(y) || any(is.finite(x) != is.finite(y)) ){
+    isSame <- FALSE
+  }
+  
+  x <- na.omit(x)
+  y <- na.omit(y)
+  
+  x <- x[is.finite(x)]
+  y <- y[is.finite(y)]
+  
+  if(length(x) != length(y)){
+    isSame <- FALSE
+  }
+  
+  if(isSame && is.numeric(x) && is.numeric(y) && length(x) > 0){
+    
+    if(is.null(normThresh) && is.null(maxThresh)){
+      stop('both normThresh and maxThresh can\'t be null')
+    }
+    
+    if(!is.null(normThresh)){
+      if(Norm2(x - y) > normThresh){
+        isSame <- FALSE
+      }
+    }
+    
+    if(!is.null(maxThresh)){
+      if(max(abs(x - y)) > maxThresh){
+        isSame <- FALSE
+      }
+    }
+    
+  }else if(isSame && !all(x == y)){
+    isSame <- FALSE
+  }
+  
+  return(isSame)
 }
 
 FindAllDuplicates <- function(v){

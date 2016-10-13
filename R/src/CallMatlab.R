@@ -1,0 +1,59 @@
+StartMatlab <- function(mat = get0('matlab')){
+  if(is.null(mat)){
+    library(R.matlab)
+    Matlab$startServer(matlab=GetConfig('MTLABPATH')) 
+    mat = Matlab()
+  }
+  if(!isOpen(mat)){
+    isOpen = open(mat)
+    if (!isOpen) throw('MATLAB server is not running: waited 30 seconds.')
+  }
+  return(mat)
+}
+
+CrossValidateTensor <- function(matlab, tensor, methods=c('mean','mean2', 'knn', 'fa_lrtc'), exp_name='test', nFolds=10, maxFolds=10, saveFile=FALSE){
+  setVariable(matlab, methods=methods, tensor=tensor, exp_name=exp_name, nFolds=nFolds, maxFolds=maxFolds)
+  evaluate(matlab, '[cvTensors, PCT, PCTf] = TensorCV4(methods, tensor, exp_name, nFolds, maxFolds);')
+  out = getVariable(matlab, 'cvTensors')$cvTensors
+  PCT = as.vector(getVariable(matlab, 'PCT')$PCT)
+  PCTf = getVariable(matlab, 'PCTf')$PCTf
+  n = length(methods)
+  stopifnot(length(out) == n^2)
+  if(n > 1){
+    outR = lapply(1:n, function(i) out[[i]][[1]])
+    names(outR) = methods
+    colnames(PCTf) = methods
+  }else{
+    outR = out[[1]][[1]]
+    PCTf = as.vector(PCTf)
+  }
+  names(PCT) = methods
+  return(list(tensors=outR, PCT=PCT, PCTf=PCTf))
+}
+
+CompleteTensor <- function(matlab, tensor, method){
+  setVariable(matlab, method=method, T=tensor)
+  evaluate(matlab, 'args = GetArgs(method, [], [], size(T), []);')
+  evaluate(matlab, 'out = CompleteTensor(T, method, args);')
+  return(getVariable(matlab, 'out')$out)
+}
+
+SplitTensor <- function(matlab, tensor, nsplit){
+  setVariable(matlab, tensor=tensor, nsplit=nsplit)
+  evaluate(matlab, '[testIdx, trainIdx] = SplitTensor(tensor, nsplit)')
+  evaluate(matlab, 'T_train = tensor; T_train(testIdx{1}) = NaN;')
+  evaluate(matlab, 'T_test = tensor; T_test(trainIdx{1}) = NaN;')
+  return(list(T_train=getVariable(matlab, 'T_train')$T.train, T_test = getVariable(matlab, 'T_test')$T.test))
+}
+
+TestMatlab <- function(mat=get0('matlab')){
+  working = FALSE
+  if(!is.null(mat) && isOpen(mat)){
+    evaluate(mat, 'a=2+2;')
+    a = getVariable(mat, 'a')$a
+    if(a == 4){
+      working = TRUE
+    }
+  }
+  return(working)
+}

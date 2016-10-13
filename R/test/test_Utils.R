@@ -8,6 +8,11 @@ TestPlotDir <- function(){
   stopifnot(file.exists(dirname(file2)))
 }
 
+TestBaseDir <- function(){
+  dirs <- unlist(strsplit(BaseDir(), "/"))
+  stopifnot(identical(dirs[length(dirs)], 'dgc_predict'))
+}
+
 TestGetConfig <- function(){
   cfg <- GetConfig("DATAPATH")
   stopifnot(is.character(cfg))
@@ -162,6 +167,13 @@ TestZScore <- function(){
 
 #### data frame helper functions ###################################################################
 
+TestFixNAStrings <- function(){
+  A <- data.frame(a=c(1, 'NA', 2), b=c(NA, NA, 'NA'))
+  B <- FixNAStrings(A, printFlag=F)
+  stopifnot(which(is.na(A)) == c(4,5))
+  stopifnot(which(is.na(B)) == c(2,4,5,6))
+}
+
 TestChangeColumnName <- function(){
   A <- data.frame(a=c(1, 'NA', 2), b=c(NA, NA, 'NA'))
   A <- ChangeColumnName(A, 'b', 'hello')
@@ -192,6 +204,14 @@ TestRemoveDfRows <- function(){
   df3 <- RemoveDfRows(df, c('row1','row2','row3'))
   stopifnot(identical(colnames(df3), c('col1','col2','col3')))
   stopifnot(all(dim(df3) == c(0,3)))
+}
+
+TestFactor2Char <- function(){
+  A <- data.frame(a=1:3, b=as.factor(c('a', 'a', NA)))
+  B <- Factor2Char(A)
+  stopifnot(is.integer(B$a))
+  stopifnot(is.character(B$b))
+  stopifnot(is.na(B[3,'b']))
 }
 
 TestRemoveDuplicateRowsMulti <- function(){
@@ -329,6 +349,14 @@ TestIsSymmetric <- function(){
 TestNorm2 <- function(){
   x <- c(2,2,sqrt(41))
   stopifnot(abs(Norm2(x) - 7) < 1e-6)
+}
+
+TestVectorCompare <- function(){
+  x <- c(1, 2, 3)
+  y <- c(1, 2, 3) + 0.01
+  stopifnot(!VectorCompare(x,y))
+  stopifnot(VectorCompare(x,y,maxThresh=0.011, normThresh=NULL))
+  stopifnot(VectorCompare(x, y, normThresh=sqrt(4e-4)))
 }
 
 TestFindAllDuplicates <- function(){

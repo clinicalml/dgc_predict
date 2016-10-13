@@ -17,27 +17,24 @@ list <- structure(NA,class="result")
   x
 }
 
-source('R/utils/Utils.R')
-source('R/utils/test_Utils.R')
+source('R/src/Utils.R')
+source('R/test/test_Utils.R')
 
-source('R/dataprocessing/DataProc.R')
-source('R/dataprocessing/test_DataProc.R')
+source('R/src/DataProc.R')
+source('R/test/test_DataProc.R')
 
-source('R/analyze_tensor_results/TensorROC.R')
-source('R/analyze_tensor_results/test_TensorROC.R')
+source('R/src/TensorROC.R')
+source('R/test/test_TensorROC.R')
 
-source('R/drug_repurp/DrugRepurp.R')
-source('R/drug_repurp/test_DrugRepurp.R')
+source('R/src/DefineTensor.R')
+source('R/test/test_DefineTensor.R')
 
-source('R/dataprocessing/DefineTensor.R')
-source('R/dataprocessing/test_DefineTensor.R')
+source('R/src/GSEA.R')
+source('R/test/test_GSEA.R')
 
-source('R/gsea/GSEA.R')
-source('R/gsea/test_GSEA.R')
-
-source('R/plot/Plot.R')
-source('R/call_matlab/CallMatlab.R')
-source('R/analyze_tensor_results/EvaluateTensor.R')
+source('R/src/Plot.R')
+source('R/src/CallMatlab.R')
+source('R/src/EvaluateTensor.R')
 
 if(!exists('testAll') || testAll){
   source('R/test/test_all.R')
