@@ -209,7 +209,7 @@ ComputeCellSpecificity <- function(X, normalize=FALSE){
   cs = rep(NA, times=nDrug)
   r = list()
   for(d in 1:nDrug){
-    print(d)
+    #print(d)
     C = A
     for(c1 in 1:nCell){ 
       x = X[d,,c1]
@@ -230,7 +230,7 @@ ComputeCellSpecificity <- function(X, normalize=FALSE){
   return(list(cs=cs, r=r))
 }
 
-ComputeGeneGeneCor <- function(tensor, nGene=dim(tensor)[2], cellSpecific=FALSE){
+ComputeGeneGeneCor <- function(tensor, nGene=dim(tensor)[2], cellSpecific=FALSE, print=TRUE){
   geneIds = dimnames(tensor)[[2]][1:nGene]
   
   if(!cellSpecific){
@@ -249,7 +249,7 @@ ComputeGeneGeneCor <- function(tensor, nGene=dim(tensor)[2], cellSpecific=FALSE)
     out = list()
     for(c in 1:length(cellIds)){
       cell = cellIds[c]
-      print(cell)
+      if(print){print(cell)}
       out[[cell]] = cor(tensor[,1:nGene,cell], use='pairwise')
     }
   }

@@ -2,6 +2,8 @@
 rng('default');
 rng(123);
 
+fprintf('WARNING: This test does not pass using the small.mat tensor. Have not figured out why, although this function is no longer in use the final versino of the code, so this is low-priority.\n')
+
 T = GetTensor('small_g50');
 nSplits = 2;
 [testIdx, trainIdx] = SplitTensor(T,nSplits);

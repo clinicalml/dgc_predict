@@ -232,7 +232,7 @@ TestComputeGeneGeneCor <- function(){
   for(i in 1:dim(X)[3]){
     gList1[[i]] = G
   }
-  gList2 = ComputeGeneGeneCor(X, nGene=10, cellSpecific=TRUE)
+  gList2 = ComputeGeneGeneCor(X, nGene=10, cellSpecific=TRUE, print=FALSE)
   cm = CorMatrixList(gList1, gList2)
   stopifnot(all(cm > 0.2))
 }

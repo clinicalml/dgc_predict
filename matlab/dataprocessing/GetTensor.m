@@ -9,7 +9,7 @@ end
 
 if(printFlag) disp(sprintf('loading %s...', tensorName)); end
 
-out = load([DataDir(), '/expr/tensor/', tensorName]);
+out = load([DataDir(), '/tensors/', tensorName]);
 T = out.T;
 pertIds = out.pertIds;
 cellIds = out.cellIds;
