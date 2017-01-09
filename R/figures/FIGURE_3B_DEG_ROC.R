@@ -4,8 +4,6 @@ library(plotrix)
 library(R.matlab)
 library(tidyr)
 
-writeToFile = TRUE
-
 #### COMPUTE ROC AND AUC CURVES FOR OVERALL TENSOR #########
 colors = GetMethodColors()
 methods = names(colors)
@@ -35,8 +33,7 @@ if(exists('OUTPUT')){
 }
 
 #### PLOT ####################################################
-if(makePlots){
-  if(writeToFile){tiff(PlotDir('ROC_tensor_knn_mean_mean2.tiff'), width=510, height=510)}
+  tiff(PlotDir('ROC_tensor_knn_mean_mean2.tiff'), width=510, height=510)
   lwd=5
   lty = c(1, 3)
   legend_str = c()
@@ -68,6 +65,5 @@ if(makePlots){
   lines(c(0,1), c(0,1), lwd=2, col='black', lty=3)
   all_colors = unlist(c(rep(c(colors$tensor, colors$knn, colors$mean2, colors$mean), 2), 'black'))
   legend('bottomright', lwd=4, legend=c(legend_str, 'random'), 
-         col=all_colors, lty=c(1, 1, 1, 1, 3, 3, 3, 3, 3), cex=1.28) #######
-  if(writeToFile){dev.off()}
-}
+         col=all_colors, lty=c(1, 1, 1, 1, 3, 3, 3, 3, 3), cex=1.28) 
+  dev.off()

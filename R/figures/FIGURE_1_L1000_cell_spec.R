@@ -1,4 +1,4 @@
-load(DataDir('results/tsize/large/cell_specificity.RData'))
+load(ResultsDir('large/cell_specificity.RData'))
 
 # print distribtuion across 2130 drugs
 tiff(PlotDir('cell_specificity_L1000.tiff'), height=300, width=480)
@@ -10,7 +10,7 @@ p = ggplot(data, aes(x=cs, color='black')) +
         axis.ticks.y=element_blank(),
         axis.text.y=element_blank()) +
   xlab('Cell specificity') +
-  ylab('Density in L1000') # +ylim(c(0,6))
+  ylab('Density in L1000')
 print(p)
 dev.off()
 
@@ -38,7 +38,6 @@ for(example in c(low, mid1, mid2, high)){
   pert_id = rownames(d2)[example]
   name = d2$name[example]
   M = GetDrugSlice(tensors$meas, pert_id)
-  #cell_ids[[name]] = colnames(M)
   idx_keep = SelectGenesToPlot(M, nGenes=40)
   p = GHeatmap(M[idx_keep,], dims=c('gene', 'cell'), clusterRows=TRUE, clusterCols=TRUE,
                main='', xAxisLabSize=60, labSize=60, rowLab=FALSE, legend=FALSE,
@@ -47,9 +46,9 @@ for(example in c(low, mid1, mid2, high)){
     p = p + xlab('') + ylab('')
   }
   p = p + theme(text=element_text(size=size),
-                axis.ticks = element_blank())#,axis.text.x=element_text(size=12))
+                axis.ticks = element_blank())
                 
-  tiff(PlotDir(sprintf('cell_spec/%s.tiff', name)))
+  tiff(PlotDir(sprintf('%s.tiff', name)))
   print(p)
   dev.off()
 }

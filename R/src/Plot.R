@@ -2,26 +2,10 @@ library(matrixStats)
 library(gplots)
 library(ggplot2)
 
-PCA <- function(data, plot.flag=T){
-  out <- prcomp(t(exprs(data)), center=T, .scale=T, 
-                tol=sqrt(.Machine$double.eps))
-  if (plot.flag){
-    plot(out$x[, 1], out$x[,2], xlab='PC1', ylab='PC2', 
-         main=paste('PCA projection of', GetExp(data), 'dataset', sep=' '))
-    text(out$x[,1], out$x[,2], pData(data)$label, cex=0.7, pos=4, col="red")
-  }
-  return(out)
-}
-
 Heatmap <- function(C, main=NULL, key=TRUE, file=NULL, margins=c(1,1),
                     colorLim=range(C), colors=c('white', 'blue'), dendrogram='none'){
-  #par(mar=c(5,4,1,5))#, oma = c(5,4,1,5))
- # CStr <- matrix(data=gsub(sprintf('%.2f', C), pattern='0[.]', replacement='.'), nrow=nrow(C), ncol=ncol(C))
   nBreaks <- 50
  colBreaks <- seq(colorLim[1], colorLim[2], length.out = nBreaks+1)
-  #colBreaks <- c(seq(colorLim[1], colorLim[2], length.out = nBreaks), colorLim[2]+1)
-  #colBreaks <- seq(0,max(na.omit(C)),length.out = nBreaks+1)
-  #colBreaks <- seq(0, 0.41, length.out=nBreaks+1)
   if(!is.null(file)){
     pdf(file=PlotDir(file=paste0(file, '.pdf')))
   }
@@ -30,11 +14,7 @@ Heatmap <- function(C, main=NULL, key=TRUE, file=NULL, margins=c(1,1),
   }
  heatmap.2(C, Rowv=TRUE, Colv=TRUE, trace='none', dendrogram=dendrogram, 
            key=key, main=main, col=colorRampPalette(colors)(nBreaks), 
-           breaks=colBreaks, key.title='', margins=margins, labCol='') #cellnote=CStr, 
-#   heatmap.2(C, Rowv=FALSE, Colv=FALSE, trace='none', dendrogram='none', 
-#             key=key, main=main, col=colorRampPalette(colors)(nBreaks), 
-#             breaks=colBreaks, key.title='', margins=margins, labCol='') #cellnote=CStr, 
-#             #,cexRow=1, cexCol=1, srtCol=45) #, lmat=rbind(c(2),c(3),c(1),c(4)), lhei=c(1,1,9,0), lwid=c(1))
+           breaks=colBreaks, key.title='', margins=margins, labCol='') 
    if(!is.null(file)){
     dev.off()
   }
@@ -47,7 +27,8 @@ GHeatmap <- function(M, dims=names(dimnames(M)),
                      rowLab=TRUE, colLab=TRUE, xAxisLabSize=12, 
                      labSize=20, titleSize=24,
                      legend=TRUE, main=NULL,
-                     low='blue', mid='#444444', high='yellow'){
+                     low='blue', mid='#444444', high='yellow',
+                     colorMap=NA){
   
   # get row and column ordering
   if(clusterRows){
@@ -78,11 +59,10 @@ GHeatmap <- function(M, dims=names(dimnames(M)),
   
   if(all(M >= 0, na.rm=TRUE)){
     p = p + scale_fill_gradient(limits=cLim, low = 'White', high = 'NavyBlue')
+  }else if(!is.na(colorMap)){
+    p = p + scale_fill_gradientn(colours=brewer.pal(7,colorMap))
   }else{
-   # p = p + scale_fill_brewer(palette='PuOr', type='div')
- #   p = p + scale_fill_gradient2(limits=cLim, low='Blue', mid='#444444', high='Yellow')
-   #p = p + scale_fill_gradient2(limits=cLim, low=low, mid=mid, high=high)
-   p = p + scale_fill_gradientn(colours=brewer.pal(7,"PuOr"))
+   p = p + scale_fill_gradient2(limits=cLim, low=low, mid=mid, high=high)
   }
   
   p = p + scale_x_discrete(expand = c(0, 0)) +
@@ -115,120 +95,6 @@ GHeatmap <- function(M, dims=names(dimnames(M)),
   return(p)
 }
 
-
-
-# metric should be either "l2" or "corr"
-Cluster <- function(data, subexp=NULL, metric=NULL, labels=colnames(data), plot.flag=T, quantile=1){
-  if (is.matrix(data)){
-    A <- data
-  }else{
-    A <- exprs(data)
-  }
-  
-  if(quantile < 1){ # choose the top (1 - quantile) fraction of the data based on variance
-    A <- A[GetVarianceQuantile(A, quantile=quantile),]
-  }
-  
-  if (metric == 'l2'){
-    d <- dist(t(A))
-    metric_str <- 'Euclidean'
-  }else if (metric == "corr"){
-    d <- as.dist(1 - cor(A))
-    metric_str <- '(1 - corr)'
-  }else{
-    stop('unexpected metric')
-  }
-
-  clust <- hclust(d)
-  if (plot.flag){
-    plot(clust, labels = labels, hang = 0.1,
-         axes = TRUE, frame.plot = FALSE, ann = TRUE,
-         main = paste(subexp, 'hierarchical clustering,', metric_str, 'metric, quantile=', quantile),
-         sub = NULL, xlab = '', ylab = '')
-  }
-  return(clust)
-}
-
-
-# return a data frame of correlation matrix without diagonal 
-SampleCorrD <- function(E){
-  # compute correlation
-  n <- ncol(E)
-  C <- cor(E, E, method="spearman")
-  
-  # remove diagonal and convert to data frame
-  D <- matrix(0, nrow = n-1, ncol = n)
-  for (i in 1:n){
-    D[,i] <- C[setdiff(1:n,i),i]
-  }
-  D <- as.data.frame(D)
-  colnames(D) <- colnames(E)
-  return(as.list(D))
-}
-
-MultiHeatmap <- function(MList, MRef=1, nGenes=NULL, cLim=NULL, 
-                         filename='multiheatmap.pdf', pdf=FALSE, 
-                         symmetric=TRUE, rowLabels=FALSE, nrow=1, 
-                         legend=TRUE, 
-                         col = colorRampPalette(c('DarkBlue', 'Blue', 'Black', 'Gold', 'Yellow'))(20)){
-  n = length(MList)
-  
-  # subselect genes to plot
-  if(!is.null(nGenes)){
-    idx_keep = SelectGenesToPlot(MList[[MRef]], nGenes=nGenes)
-    if(symmetric){
-      MList = lapply(MList, function(M) return(M[idx_keep,idx_keep]))
-    }else{
-      MList = lapply(MList, function(M) return(M[idx_keep,]))
-    }
-  }
-
-  # get row and column ordering
-  hm = heatmap(MList[[MRef]], labRow='', labCol='')
-  MList = lapply(MList, function(M) t(M[hm$rowInd, hm$colInd]) )
-
-  # plot
-  if(pdf){
-    ncol=ceiling(n/nrow)
-    width = 10*ncol+1
-    height = 10*nrow+1
-    tiff(file=PlotDir(paste0(filename, '.tiff')), width=width, height=height)
-  }
-  
-  nf = layout(matrix(1:n,nrow,ceiling(n/nrow), byrow=TRUE))
-  
-  xlab = rownames(MList[[MRef]])
-  par(mar=c(2,0,1,0)+2)
-  
-  if(is.null(cLim)){
-    cLim = range(MList, na.rm = TRUE)
-  }
-  lapply(MList, function(M) PlotImage(M, col=col, cLim=cLim, text=rowLabels))
-
-  if(pdf){dev.off()}
-
-  # plot legend separately
-  if(legend){
-    if(pdf){pdf(file=PlotDir(paste0(filename, '_legend.pdf')))}
-    breaks = seq(cLim[1], cLim[2], length.out = length(col)+1)
-    image.plot(x=1:nrow(MList[[MRef]]), y=1:ncol(MList[[MRef]]), MList[[MRef]], col=col, legend.shrink=0.2, 
-               legend.width=1.4, legend.only=TRUE, breaks=breaks, add=FALSE)
-    if(pdf){dev.off()}
-  }
-
-}
-
-PlotImage <- function(M, x=1:nrow(M), y=1:ncol(M), col, axes=FALSE, 
-                      xlab='', ylab='', main='', cLim=range(M, na.rm=TRUE), text=TRUE){
-  breaks = seq(cLim[1], cLim[2], length.out = length(col)+1)
-  image(x, y, M, axes=axes, xlab=xlab, ylab=ylab, 
-        cex.main=2.5, main=main, col=col, breaks=breaks)
-  if(text){
-    text(x, -.5, srt = 45, adj = 1, cex=1.5, labels = rownames(M), xpd = TRUE)
-  }
-}
-
-# input can also be a list (or not?)
 MultiDens <- function(df, main=''){
   df2 = melt(df)
   n = ncol(df)
@@ -239,7 +105,6 @@ MultiDens <- function(df, main=''){
 }
 
 SelectGenesToPlot <- function(M, nGenes=100){
-  # select a subset of genes to plot
   idx_var = GetVarianceTopK(M, nGenes)
   idx_med = GetMedianTopK(abs(M), nGenes)
   idx_keep = union(idx_var, idx_med)
@@ -247,7 +112,7 @@ SelectGenesToPlot <- function(M, nGenes=100){
   return(idx_keep)
 }
 
-AUCScatter <- function(x, y, xlim=c(0,1), ylim=c(0,1), diag=TRUE, 
+FancyScatter <- function(x, y, xlim=c(0,1), ylim=c(0,1), diag=TRUE, 
                        labels=NULL, labelSize=5, labelRange='2+2==4',
                        color = 'blue', size=1, xlab='', ylab='', circle=NULL, main='',
                        minCount=NULL, maxColor=NULL, cLim = c('red', 'blue'),
@@ -401,10 +266,9 @@ GetMethodColors <- function(longName = FALSE){
   colors = list(mean=GetMethodColor('mean'),
               mean2=GetMethodColor('mean2'),
               knn = GetMethodColor('knn'),
-              tensor=GetMethodColor('tensor'))#,
-              #ensemble = GetMethodColor('ensemble'))
+              tensor=GetMethodColor('tensor'))
   if(longName){
-    names(colors) = c('1D-Mean', '2D-Mean', 'KNN', 'Tensor')#, 'Ensemble')
+    names(colors) = c('1D-Mean', '2D-Mean', 'KNN', 'Tensor')
   }
   return(colors)
 }
@@ -418,7 +282,7 @@ PlotPCTf <- function(listPCTf, main){
     stat_summary(fun.y=mean,position=position_dodge(width=0.95),geom="bar") +
     stat_summary(fun.data=mean_cl_normal,position=position_dodge(0.95),geom="linerange",  size=2) + 
     ggtitle(main) +
-    scale_fill_manual(values=as.character(colors))+ #, breaks=names(colors)) +
+    scale_fill_manual(values=as.character(colors))+
     scale_y_continuous(limits=c(0,1)) + 
     theme_bw() + xlab('') + ylab('PCT per fold') +
     theme(axis.text=element_text(size=20), 
@@ -439,7 +303,8 @@ GMultiHeatmap <- function(MList, clusterRows=FALSE, colLab=TRUE, rowLab=TRUE,
                           clusterCols=FALSE, titleSize=24,
                           dims=names(dimnames(M)),xlab=dims[1], ylab=dims[2],
                           cLim = range(MList, na.rm=TRUE), titles=names(MList), 
-                          low='blue', mid='#444444', high='yellow'){
+                          low='blue', mid='#444444', high='yellow',
+                          colorMap=NA){
   
   M = MList[[1]]
   
@@ -459,7 +324,7 @@ GMultiHeatmap <- function(MList, clusterRows=FALSE, colLab=TRUE, rowLab=TRUE,
   MList = lapply(MList, function(M) M[rowInd, colInd])
   pList = lapply(1:length(MList), function(i) 
     GHeatmap(MList[[i]], dims=dims, cLim=cLim, main=titles[i], legend=FALSE, colLab=colLab, rowLab=rowLab,
-             xlab=xlab, ylab=ylab, titleSize=titleSize, low=low, mid=mid, high=high))
+             xlab=xlab, ylab=ylab, titleSize=titleSize, low=low, mid=mid, high=high, colorMap=colorMap))
   return(pList)
 }
 

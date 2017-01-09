@@ -7,11 +7,7 @@ GetDrugSlice <- function(tensor, drug){
 }
 
 annot = GetLincsAnnot()
-idx = which(annot$name %in% c('M-3M3FBS','HY-11007')) # 176, 1114
-
-#geneIds = dimnames(tensors$meas)[[2]]
-#geneMap = GetLmGenes(type='all')
-#geneSymbols = geneMap$gene_symbol[match(geneIds, geneMap$gene_id)]
+idx = which(annot$name %in% c('ABT-751','M-3M3FBS','HY-11007'))
 
 for(i in idx){
   name = annot$name[i]
@@ -20,7 +16,6 @@ for(i in idx){
     print(name)
     MList = lapply(tensors$cv, function(tensor) GetDrugSlice(tensor, pert))
     MList$meas = GetDrugSlice(tensors$meas, pert)
-    #rownames(MList$meas) = geneSymbols
     idx_keep = SelectGenesToPlot(MList$meas, nGenes=78)
     MList = lapply(MList, function(M) M[idx_keep,])
     MList = rev(MList)

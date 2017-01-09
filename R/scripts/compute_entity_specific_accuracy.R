@@ -88,5 +88,5 @@ for(dim in dim_compute){
 
 # and save to file
 if(saveToFile){
-   save(C, file=DataDir('results/tsize/large/accuracy_per_mode.RData'))
+   save(C, file=ResultsDir('large/entity_specific_accuracy.RData'))
 }

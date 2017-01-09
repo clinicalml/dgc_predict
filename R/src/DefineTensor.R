@@ -232,9 +232,9 @@ LoadCDSigs <- function(data=get0('sigs'), debug=FALSE){
 
 LoadCDInfo <- function(debug=FALSE){
   if(debug){
-    load(DataDir('expr/rdata/allDrugSigs_TEST.RData'))
+    load(DataDir('expr/allDrugSigs_TEST.RData'))
   }else{
-    load(DataDir('expr/rdata/allDrugSigs.RData'))
+    load(DataDir('expr/allDrugSigs.RData'))
   }
   return(info)
 }
