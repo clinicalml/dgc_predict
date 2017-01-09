@@ -9,9 +9,6 @@ for c = 1:size(T,3)
 end
 C = mean(C, 3, 'omitnan');
 
-%M = Unfold(T, size(T), 1)';
-%C = corr(M, 'rows', 'pairwise');
-
 clear args;
 args.K = 2;
 T_est = CompleteTensorKNNDrug(T, args);
@@ -24,5 +21,3 @@ w = C(2, [1 3]);
 x = (w(1) * T(1,:,1) + w(2) * T(3,:,1)) / sum(w);
 assert(norm(x - T_est(2,:,1)) < 1e-5);
 
-%T_est2 = CompleteTensorKNNDrugSave(T, args);
-%assert(norm(T_est(:) - T_est2(:)) < 1e-10);
