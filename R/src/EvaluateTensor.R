@@ -1,4 +1,4 @@
-ComputeGCP <- function(T_meas, T_pred_list, plot=FALSE, subset='cv', file=NA){
+ComputeGCP = function(T_meas, T_pred_list, plot=FALSE, subset='cv', file=NA){
   library(R.matlab)
   library(ggplot2)
   library(fields)
@@ -19,7 +19,7 @@ ComputeGCP <- function(T_meas, T_pred_list, plot=FALSE, subset='cv', file=NA){
   return(GCP)
 }
 
-ComputeCSpPres <- function(T_meas, T_pred_list, plot=FALSE, subset='cv', cs_true=NULL, debug=FALSE){
+ComputeCSpPres = function(T_meas, T_pred_list, plot=FALSE, subset='cv', cs_true=NULL, debug=FALSE){
   
   if(is.null(cs_true)){
     cs_true = ComputeCellSpecificity(T_meas)$cs
@@ -44,7 +44,7 @@ ComputeCSpPres <- function(T_meas, T_pred_list, plot=FALSE, subset='cv', cs_true
   return(list(CSp_cor=CSp_cor, CSp_slope=CSp_slope, cs_pred, p=p))
 }
 
-ComputePCT_AllModes <- function(T_meas, T_pred_list){
+ComputePCT_AllModes = function(T_meas, T_pred_list){
   
   list[nDrug,nGene,nCell] = dim(T_meas)
 
@@ -70,7 +70,7 @@ ComputePCT_AllModes <- function(T_meas, T_pred_list){
   return(list(PCTd=PCTd, PCTg=PCTg, PCTc=PCTc))
 }
 
-SummarizeOutput <- function(OUTPUT){
+SummarizeOutput = function(OUTPUT){
   tmp = do.call(rbind, OUTPUT)
   mean = sapply(tmp[,1], mean)
   mean2 = sapply(tmp[,2], mean)
@@ -79,27 +79,18 @@ SummarizeOutput <- function(OUTPUT){
 }
 
 # computes the error rate w.r.t. the entries that are present in both inputs
-ComputeErrorRate <- function(T_meas, T_pred){
+ComputeErrorRate = function(T_meas, T_pred){
   list[x_meas, x_pred] = Tensor2Vec(T_meas, T_pred)
   return(Norm2(x_meas - x_pred) / Norm2(x_meas)) 
 }
 
-ComputePCT <- function(T_meas, T_pred){
+ComputePCT = function(T_meas, T_pred){
   list[x_meas, x_pred] = Tensor2Vec(T_meas, T_pred)
   return(cor(x_meas, x_pred))
 }
 
-# ComputePCTPerSig <- function(T_meas, T_pred, plot=TRUE){
-#   X1 = UnfoldTensor(T_meas, 2)
-#   X2 = UnfoldTensor(T_pred, 2)
-#   stopifnot(which(is.na(X1)) == which(is.na(X2)))
-#   X1 = t(na.omit(t(X1)))
-#   X2 = t(na.omit(t(X2)))
-#   out = cor(X1, X2)
-#   return(out)
-# }
 
-ComputePCTPerSig <- function(T1, T2, format='df'){
+ComputePCTPerSig = function(T1, T2, format='df'){
   stopifnot(identical(dim(T1), dim(T2)))
   nDrug = dim(T1)[1]
   nCell = dim(T1)[3]
@@ -130,7 +121,7 @@ ComputePCTPerSig <- function(T1, T2, format='df'){
   return(out)
 }
 
-Tensor2Vec <- function(T1, T2){
+Tensor2Vec = function(T1, T2){
   x1 = as.vector(T1)
   x2 = as.vector(T2)
   

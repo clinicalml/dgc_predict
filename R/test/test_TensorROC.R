@@ -1,4 +1,4 @@
-TestSubsetIdx <- function(){
+TestSubsetIdx = function(){
   for(i in 1:10){
     v = SubsetIdx(100,i)
     stopifnot(abs(length(v)-i) <= 2)
@@ -6,7 +6,7 @@ TestSubsetIdx <- function(){
   }
 }
 
-TestSubsetRoc <- function(){
+TestSubsetRoc = function(){
   n = 1000
   x = rnorm(n)
   obs = x + rnorm(n, sd=0.05)

@@ -10,7 +10,7 @@ library(RCurl)
 library(snow)
 merge = base::merge
 
-RunGsea <- function(profile, dz_genes_up, dz_genes_down=NULL, minGeneSetSize=15, 
+RunGsea = function(profile, dz_genes_up, dz_genes_down=NULL, minGeneSetSize=15, 
                     doGSOA=FALSE, doGSEA=TRUE){
   
   GO_MF = GOGeneSets(species='Hs', ontologies=c('MF'))
@@ -43,13 +43,13 @@ RunGsea <- function(profile, dz_genes_up, dz_genes_down=NULL, minGeneSetSize=15,
   return(gsca)
 }
 
-AppendGSTerms <- function(gsca, go = c('GO_BP', 'GO_MF', 'GO_CC'), 
+AppendGSTerms = function(gsca, go = c('GO_BP', 'GO_MF', 'GO_CC'), 
                           kegg = c('PW_KEGG')){
   gsca = appendGSTerms(gsca, goGSCs=go, keggGSCs=kegg)
   return(gsca)
 }
 
-GetGSCAHits <- function(gscaList, analysis='HyperGeo.results', gsc){
+GetGSCAHits = function(gscaList, analysis='HyperGeo.results', gsc){
   out = RestrictColumns(GetGeneSet(gscaList[[1]], analysis, gsc), names(gscaList[1]))
   for(i in 2:length(gscaList)){
     tmp = RestrictColumns(GetGeneSet(gscaList[[i]], analysis, gsc), names(gscaList)[i])
@@ -60,13 +60,13 @@ GetGSCAHits <- function(gscaList, analysis='HyperGeo.results', gsc){
   return(out[to.keep, ])
 }
 
-RestrictColumns <- function(gs, name){
+RestrictColumns = function(gs, name){
   gs = gs[,c('Gene.Set.Term', 'Adjusted.Pvalue')]
   names(gs) = c('Gene.Set.Term', paste0('adj.p.', name))
   return(gs)
 }
 
-CatDF <- function(dfList){
+CatDF = function(dfList){
   if(length(dfList) == 0){
     DF = data.frame()
   }else if(length(dfList) == 1){
@@ -83,7 +83,7 @@ CatDF <- function(dfList){
   return(DF)
 }
 
-GetTerm <- function(gs){
+GetTerm = function(gs){
   if(substr(gs, 1, 2) == 'GO'){
     term = eval(parse(text=paste0('Term(GOTERM$\'', gs,'\')')))
   }else if(substr(gs, 1, 2) == 'hs'){
@@ -95,7 +95,7 @@ GetTerm <- function(gs){
   return(term)
 }
 
-LoadGSCA <- function(sigName, gs='msigdb'){
+LoadGSCA = function(sigName, gs='msigdb'){
   cat(paste(sigName, '\n'))
   if(identical(gs, 'msigdb')){
     file = sprintf('results/gsea/cf_meta_v2/rdata/%s_gsca.RData', sigName)
@@ -105,7 +105,7 @@ LoadGSCA <- function(sigName, gs='msigdb'){
   return(LoadGSCAFile(file, gs))
 }
 
-LoadGSCAFile <- function(file, gs){
+LoadGSCAFile = function(file, gs){
   load(file)
   if(!identical(gs, 'msigdb')){
     gsca = appendGSTerms(gsca, goGSCs=c('GO_BP', 'GO_MF', 'GO_CC'), keggGSCs=c('PW_KEGG'))
@@ -113,7 +113,7 @@ LoadGSCAFile <- function(file, gs){
   return(gsca)
 }
 
-WriteSigGeneSetsGoKegg <- function(gsca, analysis, sigName){
+WriteSigGeneSetsGoKegg = function(gsca, analysis, sigName){
   go_bp = OrderBy(GetGeneSet(gsca, analysis, 'GO_BP'), 'Adjusted.Pvalue')
   print(head(go_bp))
   go_mf = OrderBy(GetGeneSet(gsca, analysis, 'GO_MF'), 'Adjusted.Pvalue')
@@ -124,8 +124,7 @@ WriteSigGeneSetsGoKegg <- function(gsca, analysis, sigName){
            SheetNames=as.vector(c('GO_BP','GO_MF','GO_CC','PW_KEGG')), AdjWidth=TRUE, BoldHeaderRow=TRUE)
 }
 
-GetGeneSet <- function(gsca, analysis, oneGS){
-  #browser()
+GetGeneSet = function(gsca, analysis, oneGS){
   tableName = sprintf('gsca@result$%s$%s', analysis, oneGS)
   print(tableName)
   gsTable = eval(parse(text=tableName))
@@ -136,12 +135,12 @@ GetGeneSet <- function(gsca, analysis, oneGS){
   return(gsTable)
 }
 
-OrderByFDR <- function(table){
+OrderByFDR = function(table){
   stopifnot('FDR' %in% names(table))
   return(table[order(table$FDR),])
 }
 
-OrderBy <- function(table, colName){
+OrderBy = function(table, colName){
   table = as.data.frame(table)
   stopifnot(colName %in% names(table))
   expr = sprintf('table[order(table$%s),]', colName)
@@ -149,21 +148,21 @@ OrderBy <- function(table, colName){
   return(orderedTable)
 }
 
-TestOrderBy <- function(){
+TestOrderBy = function(){
   table = gsca1@result$GSEA.results$GO_MF
   orderedTable1 = OrderBy(table, 'FDR')
   orderedTable2 = OrderByFDR(table)
   stopifnot(identical(orderedTable1, orderedTable2))
 }
 
-GetCF2SigNames <- function(){
+GetCF2SigNames = function(){
   return(c('cf_meta_sam_fisher-05_eff-05_numstud-2_sorteff100',
            'cf_meta_sam_fisher-05_eff-05_numstud-2_sorteff200',
            'cf_meta_sam_fisher-05_eff-05_numstud-2_sorteff300',
            'cf_meta_fisherp1-05_eff-05_numstud-2'))
 }
 
-WriteGeneSetsToXLS <- function(sigName, shortName, baseDir='results/gsea', metaSig=master14){
+WriteGeneSetsToXLS = function(sigName, shortName, baseDir='results/gsea', metaSig=master14){
   load(paste0(baseDir, '/rdata/', sigName, '.RData'))
   gsca = appendGSTerms(gsca, goGSCs=c('GO_BP', 'GO_MF', 'GO_CC'), keggGSCs=c('PW_KEGG'))
   gscs = c('GO_BP', 'GO_MF', 'GO_CC', 'PW_KEGG')
@@ -206,7 +205,7 @@ WriteGeneSetsToXLS <- function(sigName, shortName, baseDir='results/gsea', metaS
   #WriteXLS(names(topGeneSets), ExcelFileName=file, names(topGeneSets), AdjWidth=FALSE, BoldHeaderRow=TRUE)  
 }
 
-GetGSEAScores <- function(gscaList){
+GetGSEAScores = function(gscaList){
   out = list()
   for(i in 1:length(gscaList)){
     gsca = names(gscaList)[i]
@@ -224,7 +223,7 @@ GetGSEAScores <- function(gscaList){
   return(out)
 }
 
-GetGSEAResultsVector <- function(singleGSEAScores, colName, 
+GetGSEAResultsVector = function(singleGSEAScores, colName, 
                                  genesets=c('GO_MF', 'GO_BP', 'GO_CC', 'PW_KEGG')){
   if(genesets == 'all'){
     genesets = names(singleGSEAScores)
@@ -237,7 +236,7 @@ GetGSEAResultsVector <- function(singleGSEAScores, colName,
   return(x)
 }
 
-GetGSEAResultsV2 <- function(gsca, colname='Pvalue', thresh=0.01, analysis='GSOA', merge=FALSE){
+GetGSEAResultsV2 = function(gsca, colname='Pvalue', thresh=0.01, analysis='GSOA', merge=FALSE){
   if(analysis == 'GSOA'){
     x = gsca@result$HyperGeo.results
   }else if(analysis == 'GSEA'){
@@ -261,7 +260,7 @@ GetGSEAResultsV2 <- function(gsca, colname='Pvalue', thresh=0.01, analysis='GSOA
 }
 
 # try pearson, spearman correlation, Fisher's exact test, cosine distance, edit distance
-GSEACompare <- function(x, y, metric='pearson', thresh=0.05){
+GSEACompare = function(x, y, metric='pearson', thresh=0.05){
   x = na.omit(x)
   y = na.omit(y)
   
@@ -294,15 +293,13 @@ GSEACompare <- function(x, y, metric='pearson', thresh=0.05){
   return(out)
 }
 
-SplitB <- function(B){
+SplitB = function(B){
   control = as.vector(B[1:4,])
   matched = c(B[5,1], B[6,2], B[7,3], B[8,4], B[9,5], B[10,6])
-  #off_diags = setdiff(B[5:10,],diags)
-  #return(list(diag = diags, off_diag=off_diags, ctrl=controls))
   return(list(control=control, matched=matched))
 }
 
-ExtractGSOAResults <- function(gsca, thresh=1){
+ExtractGSOAResults = function(gsca, thresh=1){
   out = list()
   for(type in c('GO_MF',  'GO_BP', 'GO_CC', 'PW_KEGG')){
     tmp = gsca@result$HyperGeo.results[[type]]

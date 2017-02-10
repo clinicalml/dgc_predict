@@ -4,11 +4,12 @@
 \margl1440\margr1440\vieww16200\viewh13200\viewkind0
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
-\f0\fs36 \cf0 Very minor code changes for revision 2. Mainly changed method name from KNN to DNPP and added a few aesthetic changes to the figures.\
+\f0\fs36 \cf0 Cleaning up code to submit with revision 2. \
 \
-Also added three more figure-generation scripts (for figures 4A,B, figures 4C/S10, and figures 8A/B) from manuscript revision 2.\
+Changed CDSigs data file from .txt to an RData file, and pre-subsetted it to the chemical perturbagens, so now the drugSigs and corresponding metadata (GetCDInfo) correspond row-by-row. It also loads faster. \
 \
-FancySatter in Plot.R: changed call from geom_text, to geom_text_repel (better automated layout of labels).\
+Changed all arrow assignment syntax (<-) to equals signs.\
 \
-Also had to add hjust=0.5 to ggplot titles, as this default was changed in the latest ggplot version.\
-}
+Relocated some functions that were hiding in weird places.\
+\
+Renamed a couple scripts. }

@@ -1,12 +1,9 @@
-library(matrixStats)
-library(gplots)
-library(ggplot2)
-library(ggrepel)
 
-Heatmap <- function(C, main=NULL, key=TRUE, file=NULL, margins=c(1,1),
+
+Heatmap = function(C, main=NULL, key=TRUE, file=NULL, margins=c(1,1),
                     colorLim=range(C), colors=c('white', 'blue'), dendrogram='none'){
-  nBreaks <- 50
- colBreaks <- seq(colorLim[1], colorLim[2], length.out = nBreaks+1)
+  nBreaks = 50
+ colBreaks = seq(colorLim[1], colorLim[2], length.out = nBreaks+1)
   if(!is.null(file)){
     pdf(file=PlotDir(file=paste0(file, '.pdf')))
   }
@@ -21,7 +18,7 @@ Heatmap <- function(C, main=NULL, key=TRUE, file=NULL, margins=c(1,1),
   }
 }
 
-GHeatmap <- function(M, dims=names(dimnames(M)), 
+GHeatmap = function(M, dims=names(dimnames(M)), 
                      xlab=dims[1], ylab=dims[2], 
                      cLim=range(M, na.rm=TRUE),
                      clusterRows=FALSE, clusterCols=FALSE, 
@@ -96,7 +93,7 @@ GHeatmap <- function(M, dims=names(dimnames(M)),
   return(p)
 }
 
-MultiDens <- function(df, main=''){
+MultiDens = function(df, main=''){
   df2 = melt(df)
   n = ncol(df)
   p = ggplot(df2, aes(x = value, fill = variable, group=variable)) + 
@@ -106,7 +103,7 @@ MultiDens <- function(df, main=''){
   return(p)
 }
 
-SelectGenesToPlot <- function(M, nGenes=100){
+SelectGenesToPlot = function(M, nGenes=100){
   idx_var = GetVarianceTopK(M, nGenes)
   idx_med = GetMedianTopK(abs(M), nGenes)
   idx_keep = union(idx_var, idx_med)
@@ -114,7 +111,7 @@ SelectGenesToPlot <- function(M, nGenes=100){
   return(idx_keep)
 }
 
-FancyScatter <- function(x, y, xlim=c(0,1), ylim=c(0,1), diag=TRUE, 
+FancyScatter = function(x, y, xlim=c(0,1), ylim=c(0,1), diag=TRUE, 
                        labels=NULL, labelSize=5, labelRange='2+2==4',
                        color = 'blue', size=1, xlab='', ylab='', circle=NULL, main='',
                        minCount=NULL, maxColor=NULL, cLim = c('red', 'blue'),
@@ -195,7 +192,7 @@ FancyScatter <- function(x, y, xlim=c(0,1), ylim=c(0,1), diag=TRUE,
   return(p)
 }
 
-CellSpecScatter <- function(x, y, method, diag=TRUE,
+CellSpecScatter = function(x, y, method, diag=TRUE,
                             xlim=c(0,1), ylim=c(0,1),
                             xlab='true cell specificity',
                             ylab='cell specificity among predicted profiles',
@@ -236,7 +233,7 @@ CellSpecScatter <- function(x, y, method, diag=TRUE,
 }
 
 
-PlotCSP <- function(cs_true, cs_pred, subset=''){
+PlotCSP = function(cs_true, cs_pred, subset=''){
   nDrug = length(cs_true)
   method = as.factor(rep(c('1D-Mean', '2D-Mean', 'DNPP', 'Tensor'), each=nDrug))
   true = c(rep(cs_true, 4))
@@ -250,7 +247,7 @@ PlotCSP <- function(cs_true, cs_pred, subset=''){
   dev.off()
 }
 
-GetMethodColor <- function(method){
+GetMethodColor = function(method){
   if(method == 'mean'){
     color = 'red'
   } else if(method == 'mean2'){
@@ -267,7 +264,7 @@ GetMethodColor <- function(method){
   return(color)
 }
 
-GetMethodColors <- function(longName = FALSE){
+GetMethodColors = function(longName = FALSE){
   colors = list(mean=GetMethodColor('mean'),
               mean2=GetMethodColor('mean2'),
               dnpp = GetMethodColor('dnpp'),
@@ -278,7 +275,7 @@ GetMethodColors <- function(longName = FALSE){
   return(colors)
 }
 
-PlotPCTf <- function(listPCTf, main){
+PlotPCTf = function(listPCTf, main){
   m = melt(listPCTf)
   names(m) = c('fold', 'method', 'PCT', 'tensor')
   m$method = factor(m$method, levels=c('1D-Mean', '2D-Mean', 'DNPP', 'Tensor', 'Ensemble'))
@@ -298,13 +295,13 @@ PlotPCTf <- function(listPCTf, main){
   return(p)
 }
 
-PlotDataAvailabilityInTensor <- function(tensor, main='', xAxisLabSize=6, labSize=28){
+PlotDataAvailabilityInTensor = function(tensor, main='', xAxisLabSize=6, labSize=28){
   A = MatrixCast(!is.na(tensor[,1,]), type='numeric')
   print(GHeatmap(A, rowLab=FALSE, colLab=TRUE, dims=c('drugs', 'cells'), 
                  main=main, legend=FALSE, xAxisLabSize=xAxisLabSize, labSize=labSize))
 }
 
-GMultiHeatmap <- function(MList, clusterRows=FALSE, colLab=TRUE, rowLab=TRUE,
+GMultiHeatmap = function(MList, clusterRows=FALSE, colLab=TRUE, rowLab=TRUE,
                           clusterCols=FALSE, titleSize=24,
                           dims=names(dimnames(M)),xlab=dims[1], ylab=dims[2],
                           cLim = range(MList, na.rm=TRUE), titles=names(MList), 
@@ -333,13 +330,13 @@ GMultiHeatmap <- function(MList, clusterRows=FALSE, colLab=TRUE, rowLab=TRUE,
   return(pList)
 }
 
-g_legend<-function(a.gplot){ 
-  tmp <- ggplot_gtable(ggplot_build(a.gplot)) 
-  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box") 
-  legend <- tmp$grobs[[leg]] 
+g_legend=function(a.gplot){ 
+  tmp = ggplot_gtable(ggplot_build(a.gplot)) 
+  leg = which(sapply(tmp$grobs, function(x) x$name) == "guide-box") 
+  legend = tmp$grobs[[leg]] 
   return(legend)} 
 
-PlotGCP <- function(GCP, subset='', numSigs, legend=FALSE, title=FALSE, file=NULL){
+PlotGCP = function(GCP, subset='', numSigs, legend=FALSE, title=FALSE, file=NULL){
   if(is.null(file)){
     file = sprintf('preservation_of_ggc_%s.tiff', subset)
   }

@@ -1,10 +1,8 @@
-library(reshape)
-library(data.table)
 
 # filter CD signatures to be input into the tensor
 # info should be the data frame stored in DataDir('expr/rdata/allDrugSigs.RData')
 
-SelectDataForTensor <- function(info, pThresh=1, specificDose=FALSE,
+SelectDataForTensor = function(info, pThresh=1, specificDose=FALSE,
                                 time='all', nCells=NA, nDrugs=NA, 
                                 cellIds = NA, pertIds = NA, 
                                 nPerDrug=1, nPerCell=1, print=TRUE,
@@ -122,7 +120,7 @@ SelectDataForTensor <- function(info, pThresh=1, specificDose=FALSE,
   return(info1)
 }
 
-SelectTopNCells <- function(info, nCells){
+SelectTopNCells = function(info, nCells){
   if(!is.na(nCells)){
     infoPerCell = split(info, f=info$cell_id)
     countPerCell = sapply(1:length(infoPerCell), function(i) length(unique(infoPerCell[[i]]$pert_id)))
@@ -134,7 +132,7 @@ SelectTopNCells <- function(info, nCells){
   return(info)
 }
 
-SelectTopNDrugs <- function(info, nDrugs){
+SelectTopNDrugs = function(info, nDrugs){
   if(!is.na(nDrugs)){
     infoPerDrug = split(info, f=info$pert_id)
     countPerDrug = sapply(1:length(infoPerDrug), function(i) length(unique(infoPerDrug[[i]]$cell_id)))
@@ -146,7 +144,7 @@ SelectTopNDrugs <- function(info, nDrugs){
   return(info)
 }
 
-EnsureNPerCell <- function(info, nPerCell){
+EnsureNPerCell = function(info, nPerCell){
   if(!is.na(nPerCell)){
     infoPerCell = split(info, f=info$cell_id)
     countPerCell = sapply(1:length(infoPerCell), function(i) length(unique(infoPerCell[[i]]$pert_id)))
@@ -157,7 +155,7 @@ EnsureNPerCell <- function(info, nPerCell){
   return(info)
 }
 
-EnsureNPerDrug <- function(info, nPerDrug){
+EnsureNPerDrug = function(info, nPerDrug){
   if(!is.na(nPerDrug)){
     countPerDrug = CountCellsPerDrug(info)
     drugs = names(which(countPerDrug >= nPerDrug))
@@ -166,19 +164,19 @@ EnsureNPerDrug <- function(info, nPerDrug){
   return(info)
 }
 
-CountCellsPerDrug <- function(info){
+CountCellsPerDrug = function(info){
   infoPerDrug = split(info, f=info$pert_id)
   countPerDrug = sapply(1:length(infoPerDrug), function(i) length(unique(infoPerDrug[[i]]$cell_id)))
   names(countPerDrug) = names(infoPerDrug)
   return(countPerDrug)
 }
 
-SummarizeInfo <- function(info){
+SummarizeInfo = function(info){
   return(sprintf('%d signatures, %d unique drugs, %d unique cell types', nrow(info), 
                  length(unique(info$pert_id)), length(unique(info$cell_id))))
 }
 
-SummarizeMatrix <- function(M){
+SummarizeMatrix = function(M){
   stopifnot(is.logical(M))
   numSigs = length(which(M))
   numPossible = prod(dim(M))
@@ -191,12 +189,12 @@ SummarizeMatrix <- function(M){
                  numSigs, numPossible, density, nDrugs, nCells, nPerDrug, nPerCell))
 }
 
-SummarizeTensor <- function(tensor){
+SummarizeTensor = function(tensor){
   A = !is.na(tensor[,1,])
   SummarizeMatrix(A)
 }
 
-CompareTensors <- function(T1, T2){
+CompareTensors = function(T1, T2){
   if(!identical(dim(T1), dim(T2))){
     same = FALSE
   }else{
@@ -206,47 +204,43 @@ CompareTensors <- function(T1, T2){
   return(same)
 }
 
-LoadCDSigs <- function(data=get0('sigs'), debug=FALSE){
+LoadCDSigs = function(data=get0('sigs'), debug=FALSE){
   
-  baseDir = '../../data/intermediate_data/expr/characteristic_dirxn/from_mongo_db/'
+  baseDir = DataDir('expr/')
 
   if(debug){
-    dataFile = paste0(baseDir, 'LINCS_CD_chdirLm_TEST.RData')
-    if(is.null(data) || nrow(data) != 1000){
-      load(dataFile)
-    }else{
-      sigs = data
-    }
+    dataFile = paste0(baseDir, 'drugSigs_smallSample.RData')
+    n = 1000
   }else{
-    dataFile = paste0(baseDir, 'LINCS_CD_chdirLm.txt')
-    if(is.null(data) || nrow(data) != 389031){
-      data = fread(dataFile)
-      colnames(data) = GetGeneIdsTensor()
-      sigs = as.data.frame(data)
-    }else{
-      sigs = data
-    }
+    dataFile = paste0(baseDir, 'drugSigs.RData')
+    n = NDrugSigs()
+  }
+  
+  if(is.null(data) || nrow(data) != n){
+    load(dataFile)
+  }else{
+    sigs = data
   }
   return(sigs)
 }
 
-LoadCDInfo <- function(debug=FALSE){
+LoadCDInfo = function(debug=FALSE){
   if(debug){
-    load(DataDir('expr/allDrugSigs_TEST.RData'))
+    load(DataDir('metadata/drugSigInfo_smallSample.RData'))
   }else{
-    load(DataDir('expr/allDrugSigs.RData'))
+    load(DataDir('metadata/drugSigInfo.RData'))
   }
   return(info)
 }
 
-ConstructTensor <- function(sigs, info, pThresh=1, specificDose=FALSE, time='all',
+ConstructTensor = function(sigs, info, pThresh=1, specificDose=FALSE, time='all',
                             nCells=NA, nDrugs=NA, cellIds=NA, pertIds=NA, 
                             nPerDrug=1, nPerCell=1, print=TRUE, debug=FALSE,
                             removeDuplicates=TRUE, annot=GetLincsAnnot()){
   
   if(!debug){
-    if(nrow(sigs) != 389031){warning('Input sigs is unexpected size.')}
-    if(nrow(info) != 201484){warning('Input info is unexpected size.')}
+    if(nrow(sigs) != NDrugSigs()){warning('Input sigs is unexpected size.')}
+    if(nrow(info) != NDrugSigs()){warning('Input info is unexpected size.')}
   }
   
   nGenes = 978
@@ -266,11 +260,16 @@ ConstructTensor <- function(sigs, info, pThresh=1, specificDose=FALSE, time='all
   # get several statistics on seleted data, mainly at the drug-cell-combination level
   maxP = as.matrix(cast(info[,c('pert_id', 'cell_id', 'pvalue')], pert_id ~ cell_id, max, value='pvalue'))
   maxP[is.infinite(maxP)] = NA
+  
   meanP = as.matrix(cast(info[,c('pert_id', 'cell_id', 'pvalue')], pert_id ~ cell_id, mean, value='pvalue'))
   meanP[is.infinite(meanP)] = NA
+  
   nAvg = as.matrix(cast(info[,c('pert_id', 'cell_id', 'pvalue')], pert_id ~ cell_id, length, value='pvalue'))
+  
   nReps = as.matrix(cast(info[,c('pert_id', 'cell_id', 'replicateCount')], pert_id ~ cell_id, sum, value='replicateCount'))
+  
   if(print){print(sprintf('Tensor contains %s', SummarizeMatrix(!is.na(maxP))))}
+  
   nSigs = nrow(info)
   
   # filter signatures based on selection
@@ -300,21 +299,20 @@ ConstructTensor <- function(sigs, info, pThresh=1, specificDose=FALSE, time='all
                  dimnames=list(drugs=allDrugs, genes=GetGeneIdsTensor(), cells=allCells))
   
   for(cell in allCells){
-    #if(print){print(cell)}
     drugs = normSigsC[[cell]]$pert_id
     stopifnot(!anyDuplicated(drugs))
     A = as.matrix(normSigsC[[cell]][,1:nGenes])
     tensor[drugs,,cell] = A
   }
 
-  # sort drug dimension
+  # sort drug dimension based on number of signatures available
   if(any(!is.na(pertIds))){
     tensor = tensor[pertIds,,]
   }else{
     tensor = tensor[names(sort(NumSigs(tensor, 'drug'), decreasing = TRUE)),,]
   }
   
-  # sort cell type dimension
+  # sort cell type dimension based on number of signatures available
   if(any(!is.na(cellIds))){
     tensor = tensor[,,cellIds]
   }else{
@@ -324,7 +322,7 @@ ConstructTensor <- function(sigs, info, pThresh=1, specificDose=FALSE, time='all
   return(list(tensor=tensor, maxP=maxP, meanP=meanP, nAvg=nAvg, nReps=nReps, nSigs=nSigs))
 }
 
-RestrictToCommonSigs <- function(tensorList, print=TRUE){
+RestrictToCommonSigs = function(tensorList, print=TRUE){
   # check whether dimnames are identical
   out1 = lapply(tensorList, function(tensor) dimnames(tensor)[[1]]) # drugs
   out2 = lapply(tensorList, function(tensor) dimnames(tensor)[[2]]) # genes
@@ -352,7 +350,7 @@ RestrictToCommonSigs <- function(tensorList, print=TRUE){
   return(lapply(tensorList, function(tensor){tensor[idx] = NA; return(tensor)}))
 }
 
-WriteTensor2Mat <- function(tensor, file){
+WriteTensor2Mat = function(tensor, file){
   if(!exists(file)){
     writeMat(file, T=tensor, pertIds=dimnames(tensor)[[1]], geneIds=dimnames(tensor)[[2]],
              cellIds=dimnames(tensor)[[3]])
@@ -361,7 +359,7 @@ WriteTensor2Mat <- function(tensor, file){
   }
 }
 
-SubsetTensor <- function(tensor, nDrugs=NA, nCells=NA){
+SubsetTensor = function(tensor, nDrugs=NA, nCells=NA){
   if(!is.na(nCells)){
     nPerCell = NumSigs(tensor, 'cell')
     cells = names(sort(nPerCell, decreasing=TRUE))[1:nCells]
@@ -373,4 +371,8 @@ SubsetTensor <- function(tensor, nDrugs=NA, nCells=NA){
     tensor = tensor[drugs,,]
   }
   return(tensor)
+}
+
+NDrugSigs = function(){
+  return(201484)
 }

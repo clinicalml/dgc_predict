@@ -1,15 +1,15 @@
-TestCosDistAll <- function(){
+TestCosDistAll = function(){
   warning('add test')
 }
 
-TestCosDistAllDz <- function(){
+TestCosDistAllDz = function(){
   warning('add test')
 }
 
-TestCosDistAdjP <- function(){
+TestCosDistAdjP = function(){
   warning('add test')
 }
 
-TestSubsetCosDistOut <- function(){
+TestSubsetCosDistOut = function(){
   warning('add test')
 }

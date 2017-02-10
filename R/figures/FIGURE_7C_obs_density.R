@@ -36,7 +36,7 @@ for(method in c('mean', 'mean2', 'knnd', 'fa_lrtc')){
   D[[method]] = df2
 }
 
-D2 <- ldply(D, data.frame)
+D2 = ldply(D, data.frame)
 df2 = ChangeColumnName(D2, from='.id', to='method')
 df2$method = as.factor(df2$method)
 df2$method = revalue(df2$method, c('mean'='1D-Mean', 'mean2'='2D-Mean', 'knnd'='DNPP', 'fa_lrtc'='Tensor'))

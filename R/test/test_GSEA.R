@@ -1,6 +1,6 @@
 
 
-TestRunGsea <- function(){
+TestRunGsea = function(){
   warning('needs to be further tested')
   
   set.seed(123)

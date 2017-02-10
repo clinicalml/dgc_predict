@@ -16,10 +16,6 @@ dev.off()
 
 # choose 4 examples
 
-GetDrugSlice <- function(tensor, drug){
-  return(t(na.omit(t(tensor[drug,,]))))
-}
-
 annot = GetLincsAnnot()
 rownames(data) = dimnames(tensors$meas)[[1]]
 data$nSig = NumSigs(tensors$meas, 'drug')

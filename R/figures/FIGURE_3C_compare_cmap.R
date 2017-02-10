@@ -64,10 +64,6 @@ CMAP = CMAP[,geneMap$ensembl_gene_id,]
 dimnames(CMAP)[[2]] = as.character(geneMap$entrezgene)
 LINCS = LINCS[,as.character(geneMap$entrezgene),]
 
-SubsetTensorBy <- function(LINCS, tensor){
-  return(tensor[dimnames(LINCS)[[1]], dimnames(LINCS)[[2]], dimnames(LINCS)[[3]]])
-}
-
 #### Finally, compute the correlations
 C = lapply(tensors$cv, function(tensor) ComputePCTPerSig(CMAP, SubsetTensorBy(LINCS, tensor), format='df'))
 names(C) = c('1D-Mean', '2D-Mean', 'DNPP', 'Tensor')

@@ -1,4 +1,4 @@
-TestSelectDataForTensor <- function(){
+TestSelectDataForTensor = function(){
   info = LoadCDInfo(debug=FALSE) # 
   pThresh = 0.0005
   print = FALSE
@@ -58,12 +58,7 @@ TestSelectDataForTensor <- function(){
   
 } 
 
-TestSelectTopNDrugs <- function(){}
-TestSelectTopNCells <- function(){}
-TestEnsureNPerCell <- function(){}
-TestEnsureNPerDrug <- function(){}
-
-TestCountCellsPerDrug <- function(){
+TestCountCellsPerDrug = function(){
   info = LoadCDInfo(debug=TRUE)
   sigs = LoadCDSigs(debug=TRUE)
   tensor = ConstructTensor(sigs=sigs, info=info, pThresh=1, specificDose=FALSE, time='all',
@@ -73,9 +68,7 @@ TestCountCellsPerDrug <- function(){
   stopifnot(all(count1 == count2))
 }
 
-TestSummarizeInfo <- function(){}
-
-TestSummarizeMatrix <- function(){
+TestSummarizeMatrix = function(){
   # construct matrix with known output and test
   M = matrix(data=c(TRUE, FALSE, TRUE, FALSE, TRUE, TRUE), nrow=3, ncol=2)
   numSigs = 4
@@ -92,9 +85,9 @@ TestSummarizeMatrix <- function(){
   stopifnot(out1 == out2)
 }
 
-TestSummarizeTensor <- function(){}
 
-TestCompareTensors <- function(){
+
+TestCompareTensors = function(){
   load(DataDir('tensors/T_test.RData'))
   T1 = T_test
   d = dim(T1)
@@ -108,10 +101,7 @@ TestCompareTensors <- function(){
   stopifnot(!CompareTensors(T1,T2))
 }
 
-TestLoadCDSigs <- function(){}
-TestLoadCDInfo <- function(){}
-
-TestConstructTensor <- function(){
+TestConstructTensor = function(){
   # run ConstructTensor on small sample
   info = LoadCDInfo(debug=TRUE)
   sigs = LoadCDSigs(debug=TRUE)
@@ -162,7 +152,7 @@ TestConstructTensor <- function(){
   stopifnot(min(apply(M, 2, sum)) >= 3)
 }
 
-TestRestrictToCommonSigs <- function(){
+TestRestrictToCommonSigs = function(){
   # load three tensors where I know what the common support is
   load(DataDir('tensors/T_test.RData'))
   T1 = T_test[,,1:5]
@@ -185,11 +175,53 @@ TestRestrictToCommonSigs <- function(){
   stopifnot(NumSigs(outList2[[4]]) == NumSigs(outList[[1]]) - 1)
 }
 
-TestWriteTensor2Mat <- function(){}
-
-TestSubsetTensor <- function(){
+TestSubsetTensor = function(){
   load(DataDir('tensors/T_test.RData'))
   Tsm = SubsetTensor(T_test, nDrugs=4, nCells=7)
   stopifnot(CompareTensors(Tsm, T_test[c('BRD-A84481105','BRD-A52660433','BRD-A47513740','BRD-K55127134'),,
                                        c('A375','A549','HA1E','HT29','MCF7','PC3','VCAP')]))
 }
+
+TestSelectTopNDrugs = function(){
+  info = LoadCDInfo(debug=TRUE)
+  n = 100
+  info2 = SelectTopNDrugs(info=info, nDrugs=n)
+  stopifnot(length(unique(info2$pert_id)) == n)
+  stopifnot(all(info[setdiff(rownames(info), rownames(info2)),'pert_id'] %ni% info2$pert_id))
+}
+
+TestSelectTopNCells = function(){
+  info = LoadCDInfo(debug=TRUE)
+  n = 1
+  info2 = SelectTopNCells(info=info, nCells=n)
+  stopifnot(length(unique(info2$cell_id)) == n)
+  stopifnot(all(info[setdiff(rownames(info), rownames(info2)),'cell_id'] %ni% info2$cell_id))
+}
+
+
+TestLoadCDSigs = function(){
+  # print(sprintf('Running first time..'))
+  # sigs = LoadCDSigs(debug=FALSE) # takes about a minute to run
+  # stopifnot(dim(sigs) == c(NDrugSigs(), 978)) 
+  # sigs = LoadCDSigs(debug=FALSE) # This time it shouldn't reload, so should be almost instantaneous
+  sigs = LoadCDSigs(debug=TRUE)
+  stopifnot(dim(sigs) == c(1000,978))
+}
+
+TestLoadCDInfo = function(){
+  info = LoadCDInfo(debug=TRUE)
+  stopifnot(dim(info) == c(1000, 13))
+  
+  info = LoadCDInfo(debug=FALSE)
+  stopifnot(dim(info) == c(NDrugSigs(), 13))
+}
+
+TestNDrugSigs = function(){
+  stopifnot(is.numeric(NDrugSigs()))
+}
+
+TestEnsureNPerCell = function(){} #dummy
+TestEnsureNPerDrug = function(){} #dummy
+TestSummarizeInfo = function(){} #dummy
+TestSummarizeTensor = function(){} #dummy
+TestWriteTensor2Mat = function(){} #dummy

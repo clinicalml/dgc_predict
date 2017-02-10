@@ -1,14 +1,18 @@
-library(org.Hs.eg.db)
-library(R.utils)
-library(plotrix)
-library(ROCR)
 
-GetLincsAnnot <- function(){
+SubsetTensorBy = function(LINCS, tensor){
+  return(tensor[dimnames(LINCS)[[1]], dimnames(LINCS)[[2]], dimnames(LINCS)[[3]]])
+}
+
+GetDrugSlice = function(tensor, drug){
+  return(t(na.omit(t(tensor[drug,,]))))
+}
+
+GetLincsAnnot = function(){
   load(DataDir('metadata/lincsAnnot.RData'))
   return(L)
 }
 
-NormSigs <- function(A){
+NormSigs = function(A){
   for(i in 1:nrow(A)){
     for(j in 1:dim(A)[3]){
       A[i,,j] = A[i,,j] / Norm2(A[i,,j])
@@ -17,38 +21,38 @@ NormSigs <- function(A){
   return(A)
 }
 
-ComputeDensity <- function(tensor){
+ComputeDensity = function(tensor){
   numPres = NumSigs(tensor)
   numPos = dim(tensor)[1]*dim(tensor)[3]
   return(numPres/numPos)
 }
 
-GetLmGenes <- function(type='symbol'){
-  file <- DataFile('metadata/L1000_CD_landmark_geneInfo.txt')
-  lmGeneInfo <- Factor2Char(read.table(file, header=TRUE, sep='\t'))
+GetLmGenes = function(type='symbol'){
+  file = DataFile('metadata/L1000_CD_landmark_geneInfo.txt')
+  lmGeneInfo = Factor2Char(read.table(file, header=TRUE, sep='\t'))
 
   if(type == 'symbol'){
-    out <- lmGeneInfo$gene_symbol
+    out = lmGeneInfo$gene_symbol
   }else if(type == 'entrez'){
-    out <- lmGeneInfo$gene_id
+    out = lmGeneInfo$gene_id
   }else if(type == 'probe'){
-    out <- lmGeneInfo$probe_id
+    out = lmGeneInfo$probe_id
   }else if(type == 'all'){
-    out <- lmGeneInfo
+    out = lmGeneInfo
   }else{
     warning('unexpected type, returning entrez id')
-    out <- lmGeneInfo$gene_id
+    out = lmGeneInfo$gene_id
   }
   return(out)
 }
 
-MapEntrez2Uniprot <- function(){
-  x <- org.Hs.egUNIPROT
-  mapped_genes <- mappedkeys(x) 
+MapEntrez2Uniprot = function(){
+  x = org.Hs.egUNIPROT
+  mapped_genes = mappedkeys(x) 
   return(as.list(x[mapped_genes]))
 }
 
-MapEntrez2Hugo <- function(entrez_ids){
+MapEntrez2Hugo = function(entrez_ids){
   if(!all(is.na(entrez_ids))){
     load(DataDir('metadata/hgnc_to_entrez.RData'))
     names(gene_annot) = c('hugo_id', 'entrez_id')
@@ -62,40 +66,40 @@ MapEntrez2Hugo <- function(entrez_ids){
   return(out)
 }
 
-MapUniprot2Entrez <- function(proteins, printFlag=TRUE, collapse=FALSE){
-  map <- MapEntrez2Uniprot()
-  p2e <- list()
+MapUniprot2Entrez = function(proteins, printFlag=TRUE, collapse=FALSE){
+  map = MapEntrez2Uniprot()
+  p2e = list()
   
   for(p in proteins){
-    p2e[[p]] <- NA
+    p2e[[p]] = NA
     if(printFlag) print(p)
     for(i in 1:length(map)){
       if(p %in% map[[i]]){
-        p2e[[p]] <- c(p2e[[p]], names(map)[[i]]) 
+        p2e[[p]] = c(p2e[[p]], names(map)[[i]]) 
       }
     }
     if(length(p2e[[p]]) >= 2){
-      p2e[[p]] <- setdiff(p2e[[p]], NA)
+      p2e[[p]] = setdiff(p2e[[p]], NA)
       if(collapse){
-        p2e[[p]] <- paste(p2e[[p]], collapse='|')
+        p2e[[p]] = paste(p2e[[p]], collapse='|')
       }
     }
   }
   return(as.character(p2e))
 }
 
-GetLincs2Pubchem <- function(){
+GetLincs2Pubchem = function(){
   load(DataFile('metadata/lincsAnnot_inHouse_pertInfo_allCompounds.RData'))
-  lincsIdMap <- lincsAnnot[,c('pert_id', 'pubchem_cid.pertInfo')]
-  names(lincsIdMap) <- c('pert_id', 'pubchem_id')
+  lincsIdMap = lincsAnnot[,c('pert_id', 'pubchem_cid.pertInfo')]
+  names(lincsIdMap) = c('pert_id', 'pubchem_id')
   return(lincsIdMap)
 }
 
-DataFile <- function(file){
+DataFile = function(file){
   return(paste0(GetConfig('DATAPATH'),'/',file))
 }
 
-NumSigs <- function(T, dim='all'){
+NumSigs = function(T, dim='all'){
   if(dim == 'all'){
     A = T[,1,]
     out = length(which(!is.na(A)))
@@ -109,12 +113,12 @@ NumSigs <- function(T, dim='all'){
   return(out)
 }
 
-UnfoldTensor <- function(X, dim=1){
+UnfoldTensor = function(X, dim=1){
   return(wrap(X, map=list(dim,NA)))
 }
 
 # standardize tensor values per gene
-TensorZ <- function(X, m=NULL, v=NULL){
+TensorZ = function(X, m=NULL, v=NULL){
   if(is.null(m)){
     m = apply(X, 2, function(x) mean(x, na.rm=TRUE))
   }
@@ -129,7 +133,7 @@ TensorZ <- function(X, m=NULL, v=NULL){
 }
 
 
-TensorDEG <- function(X, normGene=FALSE, method='tensor', percDEG=2, symmetric=FALSE){
+TensorDEG = function(X, normGene=FALSE, method='tensor', percDEG=2, symmetric=FALSE){
   if(all(c('drug', 'gene', 'cell') %in% names(dimnames(X)))){
     X = aperm(X, c('drug','gene', 'cell'))
   }
@@ -167,7 +171,7 @@ TensorDEG <- function(X, normGene=FALSE, method='tensor', percDEG=2, symmetric=F
   return(list(D=D, p=p_actual))
 }
 
-CallDEG <- function(x, p, symmetric=FALSE){
+CallDEG = function(x, p, symmetric=FALSE){
   d = x
   d[which(!is.na(x))] = 0
   n_elts = length(which(!is.na(x)))
@@ -187,7 +191,7 @@ CallDEG <- function(x, p, symmetric=FALSE){
   return(d)
 }
 
-ComputeAUC <- function(est, labels, computeROC=FALSE, abs=TRUE){
+ComputeAUC = function(est, labels, computeROC=FALSE, abs=TRUE){
   if(abs){est = abs(est)}
   pred = prediction(est,labels)
   auc = performance(pred, measure = "auc")
@@ -201,7 +205,7 @@ ComputeAUC <- function(est, labels, computeROC=FALSE, abs=TRUE){
   return(out)
 }
 
-ComputeCellSpecificity <- function(X, normalize=FALSE){
+ComputeCellSpecificity = function(X, normalize=FALSE){
   nDrug = dim(X)[1]
   nCell = dim(X)[3]
   # compute pairwise cosine distances between drug signatures in measured tensor
@@ -230,7 +234,7 @@ ComputeCellSpecificity <- function(X, normalize=FALSE){
   return(list(cs=cs, r=r))
 }
 
-ComputeGeneGeneCor <- function(tensor, nGene=dim(tensor)[2], cellSpecific=FALSE, print=TRUE){
+ComputeGeneGeneCor = function(tensor, nGene=dim(tensor)[2], cellSpecific=FALSE, print=TRUE){
   geneIds = dimnames(tensor)[[2]][1:nGene]
   
   if(!cellSpecific){
@@ -256,7 +260,7 @@ ComputeGeneGeneCor <- function(tensor, nGene=dim(tensor)[2], cellSpecific=FALSE,
   return(out)
 }
 
-RankSigs <- function(tensor){
+RankSigs = function(tensor){
   if(any(tensor < 0, na.rm=TRUE)){
     warning('Did you want to take absolute value?')
   }
@@ -271,7 +275,7 @@ RankSigs <- function(tensor){
   return(tensor)
 }
 
-CheckColumnStructure <- function(tensor){
+CheckColumnStructure = function(tensor){
   columnStructured = TRUE
   A = is.na(tensor[,1,])
   for(i in 2:dim(tensor)[2]){
@@ -284,7 +288,7 @@ CheckColumnStructure <- function(tensor){
   return(columnStructured)
 }
 
-RemoveMissingDataFromXY <- function(X, Y){
+RemoveMissingDataFromXY = function(X, Y){
   idx1 = na.action(na.omit(X))
   idx2 = which(is.na(Y))
   idxNA = union(idx1, idx2)
@@ -295,7 +299,7 @@ RemoveMissingDataFromXY <- function(X, Y){
   return(list(X=X, Y=Y))
 }
 
-LoadTensorMat <- function(file){
+LoadTensorMat = function(file){
   out = readMat(file)
   tensor = out$T
   geneIds = unlist(out$geneIds)
@@ -305,7 +309,7 @@ LoadTensorMat <- function(file){
   return(list(tensor=tensor, pertIds=pertIds, geneIds=geneIds, cellIds=cellIds))
 }
 
-GetGeneIdsTensor <- function(){
+GetGeneIdsTensor = function(){
   load(DataDir('tensors/T50_1.RData'))
   return(dimnames(T_meas)[[2]])
 }

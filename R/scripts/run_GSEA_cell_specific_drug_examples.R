@@ -1,6 +1,3 @@
-GetDrugSlice = function(tensor, drug){
-  return(t(na.omit(t(tensor[drug,,]))))
-}
 
 distfunc = function(x) as.dist((1-cor(x))/2)
 
@@ -59,6 +56,6 @@ for(cell in colnames(M)){
   gsea$C[[cell]] = RunGsea(profile=M[,cell], dz_genes_up = rownames(M), 
                            minGeneSetSize=minGeneSetSize, doGSOA=FALSE, doGSEA=TRUE)
 }
-results$CT = lapply(gsea$C2, function(x) GetGSEAResultsV2(x, merge=TRUE, analysis='GSEA', colname='Adjusted.Pvalue', thresh=0.05))
+results$CT = lapply(gsea$C, function(x) GetGSEAResultsV2(x, merge=TRUE, analysis='GSEA', colname='Adjusted.Pvalue', thresh=0.05))
 
 save(results, file=ResultsDir('large/gsea_cell_specific_drugs.RData'))

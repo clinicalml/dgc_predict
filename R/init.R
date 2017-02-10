@@ -1,19 +1,33 @@
 
+library(affy)
+library(devtools)
+library(gridExtra)
+library(ggplot2)
+library(ggrepel)
+library(gplots)
+library(matrixStats)
+library(org.Hs.eg.db)
+library(plotrix)
 library(plyr)
-library(R.matlab)
 library(RColorBrewer)
+library(reshape)
+library(reshape2)
+library(ROCR)
+library(R.matlab)
+library(R.utils)
 
+merge = base::merge
 options(error=recover)
- 
+
 ### enables list output of function
-list <- structure(NA,class="result")
-"[<-.result" <- function(x,...,value) {
-  args <- as.list(match.call())
-  args <- args[-c(1:2,length(args))]
-  length(value) <- length(args)
+list = structure(NA,class="result")
+"[=.result" = function(x,...,value) {
+  args = as.list(match.call())
+  args = args[-c(1:2,length(args))]
+  length(value) = length(args)
   for(i in seq(along=args)) {
-    a <- args[[i]]
-    if(!missing(a)) eval.parent(substitute(a <- v,list(a=a,v=value[[i]])))
+    a = args[[i]]
+    if(!missing(a)) eval.parent(substitute(a = v,list(a=a,v=value[[i]])))
   }
   x
 }

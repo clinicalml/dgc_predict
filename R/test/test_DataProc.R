@@ -1,10 +1,18 @@
-TestGetLincsAnnot <- function(){
+TestSubsetTensorBy = function(){
+  warning('add test')
+}
+
+TestGetDrugSlice = function(){
+  warning('add test')
+}
+
+TestGetLincsAnnot = function(){
   L = GetLincsAnnot()
   stopifnot(nrow(L) == 20452)
   stopifnot(ncol(L) == 28)
 }
 
-TestNormSigs <- function(){
+TestNormSigs = function(){
   T1 = array(data=rnorm(120), dim=c(3,10,4))
   T2 = NormSigs(T1)
   T3 = NormSigs(T2)
@@ -12,56 +20,56 @@ TestNormSigs <- function(){
   stopifnot(Norm2(T3[1,,1]) == 1)
 }
 
-TestComputeDensity <- function(){
+TestComputeDensity = function(){
   load(DataDir('tensors/T_test.RData'))
   d1 = length(which(!is.na(T_test))) / prod(dim(T_test))
   d2 = ComputeDensity(T_test)
   stopifnot(d1 == d2)
 }
 
-TestGetLmGenes <- function(){
+TestGetLmGenes = function(){
   nGene = 978 
 
-  lmGenes <- GetLmGenes('symbol')
+  lmGenes = GetLmGenes('symbol')
   stopifnot(length(lmGenes) == nGene)
   stopifnot(class(lmGenes) == 'character')
   stopifnot(lmGenes[1] == 'AARS')
   
-  lmGenes <- GetLmGenes('entrez')
+  lmGenes = GetLmGenes('entrez')
   stopifnot(length(lmGenes) == nGene)
   stopifnot(class(lmGenes) == 'integer')
   stopifnot(lmGenes[1] == 16)
   
-  lmGenes <- GetLmGenes('probe')
+  lmGenes = GetLmGenes('probe')
   stopifnot(length(lmGenes) == nGene)
   stopifnot(class(lmGenes) == 'character')
   stopifnot(lmGenes[1] == '201000_at')
 }
 
-TestMapEntrez2Uniprot <- function(){
-  x <- MapEntrez2Uniprot()
+TestMapEntrez2Uniprot = function(){
+  x = MapEntrez2Uniprot()
   stopifnot(names(x)[1] == '1')
   stopifnot(x[[1]][1] == 'P04217')
 }
 
-TestMapEntrez2Hugo <- function(){
+TestMapEntrez2Hugo = function(){
   stopifnot(MapEntrez2Hugo(55603) == 'FAM46A')
   stopifnot(MapEntrez2Hugo('55603') == 'FAM46A')
   stopifnot(all(MapEntrez2Hugo(c(100302217,23559)) == c('MIR1827', 'WBP1')))
   stopifnot(all(MapEntrez2Hugo(list(100302217,23559)) == c('MIR1827', 'WBP1')))
 }
 
-TestMapUniprot2Entrez <- function(){
-  proteins <- c('F5GWI4','A0AAB7', 'B6EC88')
-  entrez <- MapUniprot2Entrez(proteins, printFlag=FALSE)
+TestMapUniprot2Entrez = function(){
+  proteins = c('F5GWI4','A0AAB7', 'B6EC88')
+  entrez = MapUniprot2Entrez(proteins, printFlag=FALSE)
   
   stopifnot(length(entrez) == length(proteins))
-  mapBack <- MapEntrez2Uniprot()
+  mapBack = MapEntrez2Uniprot()
   stopifnot(proteins[c(1,3)] %in% unlist(mapBack[as.character(entrez)]))
 }
 
-TestGetLincs2Pubchem <- function(){
-  map <- GetLincs2Pubchem()
+TestGetLincs2Pubchem = function(){
+  map = GetLincs2Pubchem()
   stopifnot(dim(map) == c(20452,2))
   stopifnot(class(map$pert_id) == 'character')
   stopifnot(class(map$pubchem_id) == 'character')
@@ -69,12 +77,12 @@ TestGetLincs2Pubchem <- function(){
   stopifnot(length(unique(map$pubchem_id)) > 1000)
 }
 
-TestDataFile <- function(){
+TestDataFile = function(){
   file = DataFile('tensors/cmap.mat')
   stopifnot(file.exists(file))
 }
 
-TestNumSigs <- function(){
+TestNumSigs = function(){
   load(DataDir('tensors/T_small.RData'))
   n = NumSigs(T_small)
   stopifnot(n == 36)
@@ -87,8 +95,8 @@ TestNumSigs <- function(){
   stopifnot(length(nc) == dim(T_small)[3])
 }
 
-TestGetTensorAnnot <- function(){
-  annot <- GetTensorAnnot()
+TestGetTensorAnnot = function(){
+  annot = GetTensorAnnot()
   stopifnot(c('geneIds','cellIds','pertIds', 
               'pubchemIds', 'geneSymbols', 'tissues',
               'targets_entrez', 'targets', 'pertName',
@@ -114,7 +122,7 @@ TestGetTensorAnnot <- function(){
   stopifnot(annot$geneSymbols[10] == 'SOX2')
 }
 
-TestUnfoldTensor <- function(){
+TestUnfoldTensor = function(){
   load(DataDir('tensors/T_small.RData'))
   X = T_small
   M1 = UnfoldTensor(X, 1)
@@ -135,7 +143,7 @@ TestUnfoldTensor <- function(){
   stopifnot(X[a,b,1] == M3[1,n])
 }
 
-TestTensorZ <- function(){
+TestTensorZ = function(){
   load(DataDir('tensors/T_small.RData'))
   X = T_small
   Z = TensorZ(X)$Z
@@ -152,7 +160,7 @@ TestTensorZ <- function(){
   }
 }
 
-TestTensorDEG <- function(){
+TestTensorDEG = function(){
   load(DataDir('tensors/T50_1.RData'))
   X = T_meas
   eps = 1
@@ -165,7 +173,7 @@ TestTensorDEG <- function(){
     }
 }
   
-CheckXD <- function(x,d){
+CheckXD = function(x,d){
   x = na.omit(as.vector(x))
   d = na.omit(as.vector(d))
   stopifnot(length(x)>0)
@@ -174,7 +182,7 @@ CheckXD <- function(x,d){
   stopifnot(d[which(x == min(abs(x)))] == 0)
 }
 
-TestCallDEG <- function(){
+TestCallDEG = function(){
   n = 10000
   x = array(data=rnorm(n), dim=c(100,100))
   x[sample(1:n,100)] = NA
@@ -196,7 +204,7 @@ TestCallDEG <- function(){
   }
 }
 
-TestComputeAUC <- function(){
+TestComputeAUC = function(){
   n = 1000
   est = c(rep(5,n), rep(5.1,n))
   labels = c(rep(0,n), rep(1, n))
@@ -206,7 +214,7 @@ TestComputeAUC <- function(){
   stopifnot(abs(ComputeAUC(est, labels)-0.5) < 0.05)
 }
 
-TestComputeCellSpecificity <- function(){
+TestComputeCellSpecificity = function(){
   # construct one tensor with identical values
   T1 = array(data=1, dim = c(2,20,5))
   cs1 = ComputeCellSpecificity(T1, normalize=TRUE)$cs
@@ -218,13 +226,13 @@ TestComputeCellSpecificity <- function(){
   stopifnot(all(abs(cs2-1) < 0.1))
 }
 
-TestGetCellSpecificity <- function(){
+TestGetCellSpecificity = function(){
   cs = GetCellSpecificity()
   stopifnot(all(names(cs) == GetTensorAnnot()$pertIds))
   stopifnot(all(cs > 0 && cs < 2))
 }
 
-TestComputeGeneGeneCor <- function(){
+TestComputeGeneGeneCor = function(){
   load(DataDir('tensors/T50_1.RData'))
   X = T_meas
   G = ComputeGeneGeneCor(X, nGene=10, cellSpecific=FALSE)
@@ -237,7 +245,7 @@ TestComputeGeneGeneCor <- function(){
   stopifnot(all(cm > 0.2))
 }
 
-TestGetGeneGeneCor <- function(){
+TestGetGeneGeneCor = function(){
   G = GetGeneGeneCor()
   nGene = GetTensorDims('gene')
   stopifnot(dim(G) == c(nGene, nGene))
@@ -248,7 +256,7 @@ TestGetGeneGeneCor <- function(){
   stopifnot(any(is.na(G)) == FALSE) 
 }
 
-TestRankSigs <- function(){
+TestRankSigs = function(){
   load(DataDir('tensors/T50_1.RData'))
   X = abs(T_meas[1:20,1:50,])
   cs = ComputeCellSpecificity(X)$cs
@@ -259,7 +267,7 @@ TestRankSigs <- function(){
   stopifnot(which.max(X[1,,5]) == which.max(R[1,,5]))
 }
 
-TestGetAccuracyPerMode <- function(){
+TestGetAccuracyPerMode = function(){
   C = GetAccuracyPerMode()
   methods = c('mean', 'mean2', 'knn', 'tensor')
   modes = c('gene', 'drug', 'cell')
@@ -277,7 +285,7 @@ TestGetAccuracyPerMode <- function(){
   stopifnot(cor(C$tensor$drug, C$mean2$drug) > 0.5)
 }
 
-TestGetTensorDims <- function(){
+TestGetTensorDims = function(){
   a = GetTensorDims()
   T = GetDataTensor()
   stopifnot(dim(T)[1] == a$nDrug)
@@ -293,7 +301,7 @@ TestGetTensorDims <- function(){
   stopifnot(a$nCell == nCell)
 }
 
-TestGetExpCount <- function(){
+TestGetExpCount = function(){
   expCount = GetExpCount()
   annot = GetTensorAnnot()
   stopifnot(all(rownames(expCount) == annot$pertIds))
@@ -302,7 +310,7 @@ TestGetExpCount <- function(){
   stopifnot(all(!is.na(expCount)))
 }
 
-TestCheckColumnStructure <- function(){
+TestCheckColumnStructure = function(){
   load(DataDir('tensors/T_test.RData'))
   stopifnot(CheckColumnStructure(T_test))
   
@@ -318,7 +326,7 @@ TestCheckColumnStructure <- function(){
   stopifnot(!CheckColumnStructure(T3))
 }
 
-TestRemoveMissingDataFromXY <- function(){
+TestRemoveMissingDataFromXY = function(){
   X = matrix(data=1:12, nrow=6, ncol=2)
   Y = matrix(data=1:6, nrow=6, ncol=1)
   
@@ -340,9 +348,9 @@ TestRemoveMissingDataFromXY <- function(){
   stopifnot(identical(Y[-2:-4,],Y1))
 }
 
-TestLoadTensorMat <- function(){}
+TestLoadTensorMat = function(){}
 
-TestGetGeneIdsTensor <- function(){
+TestGetGeneIdsTensor = function(){
   geneIds = GetGeneIdsTensor()
   stopifnot(length(geneIds)==978)
   stopifnot(is.character(geneIds))

@@ -1,13 +1,8 @@
 
-library(gridExtra)
-
-
-GetDrugSlice <- function(tensor, drug){
-  return(t(na.omit(t(tensor[drug,,]))))
-}
 
 annot = GetLincsAnnot()
-idx = which(annot$name %in% c('ABT-751','M-3M3FBS','HY-11007'))
+drugs = c('HY-11007', 'ABT-751','M-3M3FBS', 'CARBETOCIN')
+idx = which(annot$name %in% drugs)
 
 for(i in idx){
   name = annot$name[i]
@@ -16,7 +11,7 @@ for(i in idx){
     print(name)
     MList = lapply(tensors$cv, function(tensor) GetDrugSlice(tensor, pert))
     MList$meas = GetDrugSlice(tensors$meas, pert)
-    idx_keep = SelectGenesToPlot(MList$meas, nGenes=78)
+    idx_keep = SelectGenesToPlot(MList$meas, nGenes=100)
     MList = lapply(MList, function(M) M[idx_keep,])
     MList = rev(MList)
     names(MList) = c('True', 'Tensor', 'DNPP', '2D-Mean', '1D-Mean')

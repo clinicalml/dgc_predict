@@ -1,4 +1,4 @@
-# Load metadata and signatures
+# Load drug signatures and corresponding metadata
 sigs = LoadCDSigs()
 info = LoadCDInfo()
 
@@ -13,13 +13,13 @@ tensors$manycell = SubsetTensor(out$tensor, nDrugs=300, nCells=50)
 tensors$manydrug = SubsetTensor(out$tensor, nDrugs=2000, nCells=15)
 tensors$small = out$tensor[dimnames(tensors$manycell)[[1]],,dimnames(tensors$manydrug)[[3]]] 
 
-# plot data availability
+# plot data availability (Figure 7A)
 pdf(PlotDir('data_availability_large_tensor.pdf'), width=9, height=9)
 PlotDataAvailabilityInTensor(tensors$large, xAxisLabSize=7)
 dev.off()
 
 # # save to mat files
-# WriteTensor2Mat(tensors$small, file=DataDir('expr/tensor/tsize/small/small.mat'))
-# WriteTensor2Mat(tensors$manycell, file=DataDir('expr/tensor/tsize/manycell/manycell.mat'))
-# WriteTensor2Mat(tensors$manydrug, file=DataDir('expr/tensor/tsize/manydrug/manydrug.mat'))
-# WriteTensor2Mat(tensors$large, file=DataDir('expr/tensor/tsize/large/large.mat'))
+# WriteTensor2Mat(tensors$small, file=DataDir('tensors/small.mat'))
+# WriteTensor2Mat(tensors$manycell, file=DataDir('tensors/manycell.mat'))
+# WriteTensor2Mat(tensors$manydrug, file=DataDir('tensors/manydrug.mat'))
+# WriteTensor2Mat(tensors$large, file=DataDir('tensors/large.mat'))
