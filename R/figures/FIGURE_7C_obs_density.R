@@ -12,7 +12,7 @@ for(method in c('mean', 'mean2', 'knnd', 'fa_lrtc')){
     for(tensor_size in 5){
       out1 = list()
       for(rep_num in 1:5){
-        file = DataDir(sprintf('results/tsize/small/obs_density/%s_C_size%d_rep%d.mat',
+        file = ResultsDir(sprintf('small/obs_density/%s_C_size%d_rep%d.mat',
                        method, tensor_size, rep_num))
         out1[[rep_num]] = readMat(file)$C[,1:6]
       }
@@ -39,7 +39,7 @@ for(method in c('mean', 'mean2', 'knnd', 'fa_lrtc')){
 D2 <- ldply(D, data.frame)
 df2 = ChangeColumnName(D2, from='.id', to='method')
 df2$method = as.factor(df2$method)
-df2$method = revalue(df2$method, c('mean'='1D-Mean', 'mean2'='2D-Mean', 'knnd'='KNN', 'fa_lrtc'='Tensor'))
+df2$method = revalue(df2$method, c('mean'='1D-Mean', 'mean2'='2D-Mean', 'knnd'='DNPP', 'fa_lrtc'='Tensor'))
 
 if(writeToFile){tiff(file=PlotDir('obs_density.tiff'), width=640)}
 p = ggplot(df2, aes(x=density, y=corr, color=method, group=method, linetype=method)) +
@@ -48,12 +48,12 @@ p = ggplot(df2, aes(x=density, y=corr, color=method, group=method, linetype=meth
   xlab("Observation density (%)") +
   ylab("PCT") +
   guides(lty=guide_legend(keywidth=12), color=guide_legend(keywidth=5)) +
-  theme_minimal() + 
+  theme_classic() + 
   theme(text=element_text(size=26),
         legend.title = element_blank(),
         legend.position = c(0.75, 0.15)) +
   scale_color_manual(values=unlist(GetMethodColors(longName=TRUE))) +
-  scale_linetype_manual(values=unlist(list(`1D-Mean`=2,`2D-Mean`=4,`KNN`=5,`Tensor`=1))) +
+  scale_linetype_manual(values=unlist(list(`1D-Mean`=2,`2D-Mean`=4,`DNPP`=5,`Tensor`=1))) +
   ylim(c(0.2,0.7))
 print(p)
 if(writeToFile){dev.off()}

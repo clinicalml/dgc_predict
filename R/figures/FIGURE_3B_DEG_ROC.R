@@ -24,16 +24,8 @@ for(i in 1:length(percDEG)){
   }
 }
 
-# save output at percDEG = 1
-if(exists('OUTPUT')){
-  stopifnot(percDEG[1]==1)
-  for(method in methods){
-    OUTPUT$AUC_DEG1[[method]] = out[[method]][[1]]$auc
-  }
-}
-
 #### PLOT ####################################################
-  tiff(PlotDir('ROC_tensor_knn_mean_mean2.tiff'), width=510, height=510)
+  tiff(PlotDir('ROC_tensor_dnpp_mean_mean2.tiff'), width=510, height=510)
   lwd=5
   lty = c(1, 3)
   legend_str = c()
@@ -54,16 +46,16 @@ if(exists('OUTPUT')){
       lines(roc[['mean']]$fpr, roc[['mean']]$tpr, col=colors$mean, lwd=lwd, type='l', lty=lt)
     }
     lines(roc[['mean2']]$fpr, roc[['mean2']]$tpr, col=colors$mean2, lwd=lwd, type='l', lty=lt)
-    lines(roc[['knn']]$fpr, roc[['knn']]$tpr, col=colors$knn, lwd=lwd, type='l', lty=lt)
+    lines(roc[['dnpp']]$fpr, roc[['dnpp']]$tpr, col=colors$dnpp, lwd=lwd, type='l', lty=lt)
     lines(roc[['tensor']]$fpr, roc[['tensor']]$tpr, col=colors$tensor, lwd=lwd, type='l',lty=lt)
     
     legend_str = c(legend_str, sprintf('Tensor, %0.0f%% DEG, AUC=%0.2f', percDEG[i], out[['tensor']][[i]]$auc))
-    legend_str = c(legend_str, sprintf('KNN, %0.0f%% DEG, AUC=%0.2f', percDEG[i], out[['knn']][[i]]$auc))
+    legend_str = c(legend_str, sprintf('DNPP, %0.0f%% DEG, AUC=%0.2f', percDEG[i], out[['dnpp']][[i]]$auc))
     legend_str = c(legend_str, sprintf('2D-Mean, %0.0f%% DEG, AUC=%0.2f', percDEG[i], out[['mean2']][[i]]$auc))
     legend_str = c(legend_str, sprintf('1D-Mean, %0.0f%% DEG, AUC=%0.2f', percDEG[i], out[['mean']][[i]]$auc))
   }
   lines(c(0,1), c(0,1), lwd=2, col='black', lty=3)
-  all_colors = unlist(c(rep(c(colors$tensor, colors$knn, colors$mean2, colors$mean), 2), 'black'))
+  all_colors = unlist(c(rep(c(colors$tensor, colors$dnpp, colors$mean2, colors$mean), 2), 'black'))
   legend('bottomright', lwd=4, legend=c(legend_str, 'random'), 
          col=all_colors, lty=c(1, 1, 1, 1, 3, 3, 3, 3, 3), cex=1.28) 
   dev.off()

@@ -1,14 +1,15 @@
-testAll = TRUE
+testAll = FALSE
 makePlots = TRUE
 source('R/init.R')
 library(R.matlab)
 
 sz = 'large'
 fullDataset = TRUE
+loadMergeAndPred = FALSE
 
 if(fullDataset){
   # just load measured and CV tensors (takes a long time to run)
-  source('R/dataprocessing/load_all_large_tensors.R')
+  source('R/scripts/load_all_tensors.R')
 }else{
     tensors = list()
     tensors$meas = LoadTensorMat(DataDir('tensors/T50_1.RData'))
@@ -29,14 +30,16 @@ if(fullDataset){
 }
 
 source('R/figures/FIGURE_1_L1000_cell_spec.R')
-source('R/FIGURE_3A_scatter.R')
-source('R/FIGURE_3B_DEG_ROC.R')
-source('R/FIGURE_3C_compare_cmap.R')
-source('R/FIGURE_4AB_cell_specific_drugs.R')
-source('R/FIGURE_5A_gene_cor_heatmaps.R')
-source('R/FIGURE_5B_gene_cor_bargraphs.R')
-source('R/FIGURE_6B-D_entity_specific_accuracy.R')
-source('R/FIGURE_7B_tsize_results.R')
-source('R/FIGURE_7C_obs_density.R')
-source('R/FIGURE_S4_benchmarking.R')
-source('R/FIGURE_S5_tensor_DEG_method.R')
+source('R/figures/FIGURE_3A_scatter.R')
+source('R/figures/FIGURE_3B_DEG_ROC.R')
+source('R/figures/FIGURE_3C_compare_cmap.R')
+source('R/figures/FIGURE_4AB_cell_specific_drugs.R')
+source('R/figures/FIGURE_4C_and_S10_ABC_preservation_of_cell_specificity.R')
+source('R/figures/FIGURE_5A_gene_cor_heatmaps.R')
+source('R/figures/FIGURE_5B_gene_cor_bargraphs.R')
+source('R/figures/FIGURE_6B-D_entity_specific_accuracy.R')
+source('R/figures/FIGURE_7B_tsize_results.R')
+source('R/figures/FIGURE_7C_obs_density.R')
+source('R/figures/FIGURE_8AB_drug_repurposing.R')
+source('R/figures/FIGURE_S4_benchmarking.R')
+source('R/figures/FIGURE_S5_tensor_DEG_method.R')

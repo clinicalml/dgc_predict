@@ -70,7 +70,7 @@ SubsetTensorBy <- function(LINCS, tensor){
 
 #### Finally, compute the correlations
 C = lapply(tensors$cv, function(tensor) ComputePCTPerSig(CMAP, SubsetTensorBy(LINCS, tensor), format='df'))
-names(C) = c('1D-Mean', '2D-Mean', 'KNN', 'Tensor')
+names(C) = c('1D-Mean', '2D-Mean', 'DNPP', 'Tensor')
 C$True = ComputePCTPerSig(CMAP, LINCS, format='df')
 sig = C$True$adjP < 0.05 & C$True$R > 0
 for(method in names(C)){
@@ -85,7 +85,7 @@ allC_sig$group = 'significant'
 
 data = rbind(allC, allC_sig)
 
-data$method = factor(data$method, levels=c('True', '1D-Mean', '2D-Mean', 'KNN', 'Tensor'), ordered = TRUE)
+data$method = factor(data$method, levels=c('True', '1D-Mean', '2D-Mean', 'DNPP', 'Tensor'), ordered = TRUE)
 
 p = ggplot(data, aes(x=method, y=R, group=interaction(group,method), fill=group)) +
   geom_boxplot() +
@@ -103,4 +103,4 @@ dev.off()
 
 diff = lapply(C, function(c) t.test(C$True[sig,'R'], c[sig,'R'], paired=TRUE)$estimate)
 pval = lapply(C, function(c) t.test(C$True[sig,'R'], c[sig,'R'], paired=TRUE)$p.value)
-# Turns out that KNN is the only one you can't distinguish from the correlations with measured signatures
+# Turns out that DNPP is the only one you can't distinguish from the correlations with measured signatures

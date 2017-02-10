@@ -1,8 +1,5 @@
 
 
-library(easyGgplot2)
-library(RColorBrewer)
-
 MList = list()
 
 for(cell in c('MDAMB231')){
@@ -10,7 +7,7 @@ for(cell in c('MDAMB231')){
 
     MList = lapply(tensors[[subset]], function(X) cor(X[,,cell], use='pairwise'))
     MList$True = cor(tensors$meas[,,cell], use='pairwise')
-    names(MList) = c('1D-Mean', '2D-Mean', 'KNN', 'Tensor','True')
+    names(MList) = c('1D-Mean', '2D-Mean', 'DNPP', 'Tensor','True')
     MList = rev(MList)
     
     idx_keep = SelectGenesToPlot(MList[[1]], nGenes=200)

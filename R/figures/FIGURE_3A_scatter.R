@@ -8,9 +8,9 @@ writeToFile = TRUE
 addLegend = FALSE
 useMethodColors = FALSE
 
-main = list(mean='1D-Mean', mean2='2D-Mean', knn='KNN', tensor='Tensor')
+main = list(mean='1D-Mean', mean2='2D-Mean', dnpp='DNPP', tensor='Tensor')
 
-for(method in c('mean', 'mean2', 'knn', 'tensor')){
+for(method in c('mean', 'mean2', 'dnpp', 'tensor')){
   
   true = as.vector(tensors$meas)
   est = as.vector(tensors$cv[[method]])

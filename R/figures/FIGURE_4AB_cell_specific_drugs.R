@@ -19,7 +19,7 @@ for(i in idx){
     idx_keep = SelectGenesToPlot(MList$meas, nGenes=78)
     MList = lapply(MList, function(M) M[idx_keep,])
     MList = rev(MList)
-    names(MList) = c('True', 'Tensor', 'KNN', '2D-Mean', '1D-Mean')
+    names(MList) = c('True', 'Tensor', 'DNPP', '2D-Mean', '1D-Mean')
     tiff(PlotDir(sprintf('%s.tiff', name)), width=1200, height=350)
     pList = GMultiHeatmap(MList, clusterRows=TRUE, clusterCols=TRUE, dims=c('gene','cell'), 
                           colLab=TRUE, rowLab=FALSE, xlab='', ylab='', titleSize=24)

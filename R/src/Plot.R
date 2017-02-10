@@ -1,6 +1,7 @@
 library(matrixStats)
 library(gplots)
 library(ggplot2)
+library(ggrepel)
 
 Heatmap <- function(C, main=NULL, key=TRUE, file=NULL, margins=c(1,1),
                     colorLim=range(C), colors=c('white', 'blue'), dendrogram='none'){
@@ -69,7 +70,7 @@ GHeatmap <- function(M, dims=names(dimnames(M)),
     scale_y_discrete(expand = c(0, 0)) +
     xlab(ylab) + ylab(xlab) +
     theme(axis.title = element_text(size=labSize),
-          plot.title = element_text(size=titleSize),
+          plot.title = element_text(size=titleSize, hjust=0.5),
           legend.title = element_blank())
   
   if(colLab){
@@ -89,7 +90,7 @@ GHeatmap <- function(M, dims=names(dimnames(M)),
   }
   
   if(!is.null(main)){
-    p = p + ggtitle(main)
+    p = p + ggtitle(main) + theme(plot.title = element_text(hjust = 0.5))
   }
   
   return(p)
@@ -100,7 +101,8 @@ MultiDens <- function(df, main=''){
   n = ncol(df)
   p = ggplot(df2, aes(x = value, fill = variable, group=variable)) + 
     geom_density(alpha = 1/n) +
-    ggtitle(main)
+    ggtitle(main) +
+    theme(plot.title=element_text(hjust=0.5))
   return(p)
 }
 
@@ -133,13 +135,15 @@ FancyScatter <- function(x, y, xlim=c(0,1), ylim=c(0,1), diag=TRUE,
   
   p = ggplot(df, aes(x=x, y=y, color=color, size=size, shape=shape, label=labels)) +
     geom_point(alpha=alpha) +
-    xlim(xlim) + ylim(ylim) + ggtitle(main) +
+    xlim(xlim) + ylim(ylim) + 
     xlab(xlab) + ylab(ylab) +
     scale_size(guide=FALSE) +
     theme_classic() +
     theme(text = element_text(size=22), 
           legend.background = element_rect(fill='transparent'),
-          legend.key.size = unit(1.2,'cm'))
+          legend.key.size = unit(1.2,'cm'),
+          plot.title = element_text(size=26, hjust=0.5)) + 
+    ggtitle(main)
 
   if(!is.null(circle)){
     p = p + geom_point(aes(x=x[circle], y=y[circle]), shape=21, size=7, color='red') + scale_shape(solid=FALSE)
@@ -174,9 +178,10 @@ FancyScatter <- function(x, y, xlim=c(0,1), ylim=c(0,1), diag=TRUE,
   if(length(labels) == nrow(df)){
     df$name = labels
     data = eval(parse(text=sprintf('subset(df, %s)', labelRange)))
-    p = p + geom_text(data=data, aes(x=x, y=y, group=x, label=name), check_overlap = TRUE, color='black',
-                      size=labelSize, position=position_dodge(dodge))
-  }
+    p = p + geom_text_repel(data=data, aes(x=x, y=y, group=x, label=name), color='black',
+                     size=labelSize, segment.size = 1, segment.color='black', box.padding = unit(1.1, "lines"),
+                     point.padding = unit(0.3, "lines"))
+    }
   
   if(print){
     print(p)
@@ -207,7 +212,7 @@ CellSpecScatter <- function(x, y, method, diag=TRUE,
   df = data.frame(x=x, y=y, method=method)
   
   p = ggplot(df, aes(x=x, y=y, group=method)) +
-    geom_point(aes(color=method, shape=method), size=3, alpha=0.4) +
+    geom_point(aes(color=method, shape=method), size=3, alpha=0.6) +
     xlim(xlim) + ylim(ylim) + ggtitle(main) +
     xlab(xlab) + ylab(ylab) +
     theme_classic() +
@@ -217,7 +222,7 @@ CellSpecScatter <- function(x, y, method, diag=TRUE,
           legend.background = element_rect(fill='white', size=0.6, linetype='solid', colour ='DarkGrey'),
           axis.text = element_text(size=20),
           axis.title = element_text(size=20),
-          plot.title = element_text(size=20),
+          plot.title = element_text(size=20, hjust=0.5),
           plot.margin=unit(c(1,1,1,1),'cm')) +
     scale_color_manual(values=unlist(GetMethodColors(longName = TRUE))) +
     scale_shape_manual(values=c(15, 17, 18, 19)) +
@@ -233,10 +238,10 @@ CellSpecScatter <- function(x, y, method, diag=TRUE,
 
 PlotCSP <- function(cs_true, cs_pred, subset=''){
   nDrug = length(cs_true)
-  method = as.factor(rep(c('1D-Mean', '2D-Mean', 'KNN', 'Tensor'), each=nDrug))
+  method = as.factor(rep(c('1D-Mean', '2D-Mean', 'DNPP', 'Tensor'), each=nDrug))
   true = c(rep(cs_true, 4))
   ystr = list(cv='cross-validated', pred='predicted', merge='cv plus predicted')
-  pred = c(cs_pred$mean, cs_pred$mean2, cs_pred$knn, cs_pred$tensor)
+  pred = c(cs_pred$mean, cs_pred$mean2, cs_pred$dnpp, cs_pred$tensor)
   tiff(PlotDir(sprintf('preservation_of_cell_specificity_%s.tiff', subset)), width=620)
   CellSpecScatter(true, pred, method=method, subset=subset, 
                   xlab = 'cell specificity (measured)',
@@ -252,7 +257,7 @@ GetMethodColor <- function(method){
     color = '#56B4E9'
   }else if(method == 'tensor' || method == 'fa_lrtc'){
     color = '#E69F00'
-  }else if(method == 'knnd' || method == 'knn'){
+  }else if(method == 'knnd' || method == 'knn' || method == 'dnpp'){
     color = '#66CC00'
   }else if(method == 'ensemble'){
     color = 'purple'
@@ -265,10 +270,10 @@ GetMethodColor <- function(method){
 GetMethodColors <- function(longName = FALSE){
   colors = list(mean=GetMethodColor('mean'),
               mean2=GetMethodColor('mean2'),
-              knn = GetMethodColor('knn'),
+              dnpp = GetMethodColor('dnpp'),
               tensor=GetMethodColor('tensor'))
   if(longName){
-    names(colors) = c('1D-Mean', '2D-Mean', 'KNN', 'Tensor')
+    names(colors) = c('1D-Mean', '2D-Mean', 'DNPP', 'Tensor')
   }
   return(colors)
 }
@@ -276,7 +281,7 @@ GetMethodColors <- function(longName = FALSE){
 PlotPCTf <- function(listPCTf, main){
   m = melt(listPCTf)
   names(m) = c('fold', 'method', 'PCT', 'tensor')
-  m$method = factor(m$method, levels=c('1D-Mean', '2D-Mean', 'KNN', 'Tensor', 'Ensemble'))
+  m$method = factor(m$method, levels=c('1D-Mean', '2D-Mean', 'DNPP', 'Tensor', 'Ensemble'))
   colors = GetMethodColors(longName=TRUE)
   p = ggplot(m, aes(x=tensor, y=PCT, fill=method)) +
     stat_summary(fun.y=mean,position=position_dodge(width=0.95),geom="bar") +
@@ -289,7 +294,7 @@ PlotPCTf <- function(listPCTf, main){
           axis.title=element_text(size=26),
           legend.title = element_blank(),
           legend.text = element_text(size=20), 
-          plot.title = element_text(size=26))
+          plot.title = element_text(size=26, hjust=0.5))
   return(p)
 }
 
@@ -352,9 +357,9 @@ PlotGCP <- function(GCP, subset='', numSigs, legend=FALSE, title=FALSE, file=NUL
   m = list()
   s = list()
   colors = GetMethodColors(longName=TRUE)
-  df = data.frame(cell=cellIds, mean=GCP$mean, mean2=GCP$mean2, knn=GCP$knn, tensor=GCP$tensor)
+  df = data.frame(cell=cellIds, mean=GCP$mean, mean2=GCP$mean2, dnpp=GCP$dnpp, tensor=GCP$tensor)
   df2 = gather(df, 'method', 'cor', 2:5)
-  df2$method = revalue(df2$method, c('mean'='1D-Mean', 'mean2'='2D-Mean', 'knn'='KNN', 'tensor'='Tensor'))
+  df2$method = revalue(df2$method, c('mean'='1D-Mean', 'mean2'='2D-Mean', 'dnpp'='DNPP', 'tensor'='Tensor'))
   df2 = transform(df2, cell=reorder(as.factor(cell), -numSigs[cell]))
   p = ggplot(df2, aes(x=cell, y=cor, fill = method)) +
     geom_bar(stat='identity', position=position_dodge()) +
@@ -373,7 +378,7 @@ PlotGCP <- function(GCP, subset='', numSigs, legend=FALSE, title=FALSE, file=NUL
   }
   
   if(title){
-    p = p + ggtitle(main) + theme(plot.title = element_text(size=30))
+    p = p + ggtitle(main) + theme(plot.title = element_text(size=30, hjust=0.5))
   }
     
   tiff(PlotDir(file), width=2000, height=300)
