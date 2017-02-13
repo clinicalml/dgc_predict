@@ -326,28 +326,6 @@ TestCheckColumnStructure = function(){
   stopifnot(!CheckColumnStructure(T3))
 }
 
-TestRemoveMissingDataFromXY = function(){
-  X = matrix(data=1:12, nrow=6, ncol=2)
-  Y = matrix(data=1:6, nrow=6, ncol=1)
-  
-  list[X1,Y1] = RemoveMissingDataFromXY(X,Y)
-  stopifnot(identical(X,X1))
-  stopifnot(identical(Y,Y1))
-  
-  X[2,] = NA
-  X[3,1] = NA
-  
-  list[X1,Y1] = RemoveMissingDataFromXY(X,Y)
-  stopifnot(identical(X[-2:-3,],X1))
-  stopifnot(identical(Y[-2:-3,],Y1))
-  
-  Y[4] = NA
-  
-  list[X1,Y1] = RemoveMissingDataFromXY(X,Y)
-  stopifnot(identical(X[-2:-4,],X1))
-  stopifnot(identical(Y[-2:-4,],Y1))
-}
-
 TestLoadTensorMat = function(){}
 
 TestGetGeneIdsTensor = function(){

@@ -1,8 +1,4 @@
 ComputeGCP = function(T_meas, T_pred_list, plot=FALSE, subset='cv', file=NA){
-  library(R.matlab)
-  library(ggplot2)
-  library(fields)
-
   G_meas = ComputeGeneGeneCor(T_meas, cellSpecific=TRUE)
   G_pred_list = lapply(T_pred_list, function(tensor) ComputeGeneGeneCor(tensor, cellSpecific=TRUE))
   GCP = lapply(G_pred_list, function(G) CorMatrixList(G_meas, G))
@@ -70,25 +66,10 @@ ComputePCT_AllModes = function(T_meas, T_pred_list){
   return(list(PCTd=PCTd, PCTg=PCTg, PCTc=PCTc))
 }
 
-SummarizeOutput = function(OUTPUT){
-  tmp = do.call(rbind, OUTPUT)
-  mean = sapply(tmp[,1], mean)
-  mean2 = sapply(tmp[,2], mean)
-  tensor = sapply(tmp[,3], mean)
-  return(data.frame(mean=mean, mean2=mean2, tensor=tensor))
-}
-
-# computes the error rate w.r.t. the entries that are present in both inputs
-ComputeErrorRate = function(T_meas, T_pred){
-  list[x_meas, x_pred] = Tensor2Vec(T_meas, T_pred)
-  return(Norm2(x_meas - x_pred) / Norm2(x_meas)) 
-}
-
 ComputePCT = function(T_meas, T_pred){
   list[x_meas, x_pred] = Tensor2Vec(T_meas, T_pred)
   return(cor(x_meas, x_pred))
 }
-
 
 ComputePCTPerSig = function(T1, T2, format='df'){
   stopifnot(identical(dim(T1), dim(T2)))

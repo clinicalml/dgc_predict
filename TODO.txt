@@ -1,0 +1,13 @@
+Build better test for TensorCV4.m (and rename).
+Make better test for CompleteTensor.m
+Fix pointer to figure 8AB.
+TestSubsetTensorBy
+TestGetDrugSlice
+Test EvaluateTensor
+Test CallMatlab
+Make example script:
+ - Construct tensor
+ - Complete tensor
+ - Cross-validate tensor
+Finish README
+Commit and test all R and Matlab code

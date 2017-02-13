@@ -1,6 +1,3 @@
-source('R/test/test_helpers.R')
-debug=0
-
 function.names = c(GetFunctionNames('R/src/Utils.R'), 
                     GetFunctionNames('R/src/DataProc.R'),
                     GetFunctionNames('R/src/TensorROC.R'),

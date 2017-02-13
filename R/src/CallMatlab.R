@@ -37,23 +37,3 @@ CompleteTensor = function(matlab, tensor, method){
   evaluate(matlab, 'out = CompleteTensor(T, method, args);')
   return(getVariable(matlab, 'out')$out)
 }
-
-SplitTensor = function(matlab, tensor, nsplit){
-  setVariable(matlab, tensor=tensor, nsplit=nsplit)
-  evaluate(matlab, '[testIdx, trainIdx] = SplitTensor(tensor, nsplit)')
-  evaluate(matlab, 'T_train = tensor; T_train(testIdx{1}) = NaN;')
-  evaluate(matlab, 'T_test = tensor; T_test(trainIdx{1}) = NaN;')
-  return(list(T_train=getVariable(matlab, 'T_train')$T.train, T_test = getVariable(matlab, 'T_test')$T.test))
-}
-
-TestMatlab = function(mat=get0('matlab')){
-  working = FALSE
-  if(!is.null(mat) && isOpen(mat)){
-    evaluate(mat, 'a=2+2;')
-    a = getVariable(mat, 'a')$a
-    if(a == 4){
-      working = TRUE
-    }
-  }
-  return(working)
-}

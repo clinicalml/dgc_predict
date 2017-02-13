@@ -16,7 +16,6 @@ for(method in c('mean', 'mean2', 'dnpp', 'tensor')){
   est = as.vector(tensors$cv[[method]])
   cor = cor(true, est, use='pairwise.complete.obs', method='pearson')
   
-  if(!exists('makePlots') || makePlots){
     if(writeToFile){tiff(PlotDir(sprintf('expression_scatter_%s.tiff', method)))}
     par(mar=c(5,6,4,2))
     if(useMethodColors){
@@ -38,7 +37,6 @@ for(method in c('mean', 'mean2', 'dnpp', 'tensor')){
              lwd=8, col=c('black', 'blue'), cex=1.8, bty='n')
     }
     if(writeToFile){dev.off()}
-  }
 }
 
 

@@ -288,17 +288,6 @@ CheckColumnStructure = function(tensor){
   return(columnStructured)
 }
 
-RemoveMissingDataFromXY = function(X, Y){
-  idx1 = na.action(na.omit(X))
-  idx2 = which(is.na(Y))
-  idxNA = union(idx1, idx2)
-  if(length(idxNA) > 0){
-    X = as.matrix(X[-idxNA,])
-    Y = Y[-idxNA]
-  }
-  return(list(X=X, Y=Y))
-}
-
 LoadTensorMat = function(file){
   out = readMat(file)
   tensor = out$T
