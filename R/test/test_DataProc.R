@@ -1,9 +1,20 @@
-TestSubsetTensorBy = function(){
-  warning('add test')
+TestSubsetTensorDims = function(){
+  load(DataDir('tensors/T_test.RData'))
+  list[drugs, genes, cells] = dimnames(T_test)
+  Tsm = T_test[drugs[3:4], genes[1:3], cells[1:4]]
+  Tlg = T_test
+  out = SubsetTensorDims(tensorWithDesiredDims=Tsm, tensorToSubset=Tlg)
+  stopifnot(identical(out, Tsm))
 }
 
 TestGetDrugSlice = function(){
-  warning('add test')
+  drug = 'BRD-A52660433'
+  load(DataDir('tensors/T_test.RData'))
+  M = GetDrugSlice(tensor=T_test, drug=drug)
+  stopifnot(NumSigs(T_test, 'drug')[drug] == ncol(M))
+  stopifnot(dim(T_test)[[2]] == nrow(M))
+  stopifnot(colnames(M) %in% dimnames(T_test)[[3]])
+  stopifnot(identical(rownames(M), dimnames(T_test)[[2]]))
 }
 
 TestGetLincsAnnot = function(){
@@ -224,12 +235,6 @@ TestComputeCellSpecificity = function(){
   T2 = array(data=rnorm(1000), dim=c(2,100,5))
   cs2 = ComputeCellSpecificity(T2, normalize=TRUE)$cs
   stopifnot(all(abs(cs2-1) < 0.1))
-}
-
-TestGetCellSpecificity = function(){
-  cs = GetCellSpecificity()
-  stopifnot(all(names(cs) == GetTensorAnnot()$pertIds))
-  stopifnot(all(cs > 0 && cs < 2))
 }
 
 TestComputeGeneGeneCor = function(){

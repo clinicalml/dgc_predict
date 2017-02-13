@@ -1,6 +1,8 @@
 
-SubsetTensorBy = function(LINCS, tensor){
-  return(tensor[dimnames(LINCS)[[1]], dimnames(LINCS)[[2]], dimnames(LINCS)[[3]]])
+SubsetTensorDims = function(tensorWithDesiredDims, tensorToSubset){
+  return(tensorToSubset[dimnames(tensorWithDesiredDims)[[1]], 
+                        dimnames(tensorWithDesiredDims)[[2]],
+                        dimnames(tensorWithDesiredDims)[[3]]])
 }
 
 GetDrugSlice = function(tensor, drug){
@@ -22,15 +24,14 @@ NormSigs = function(A){
 }
 
 ComputeDensity = function(tensor){
-  numPres = NumSigs(tensor)
-  numPos = dim(tensor)[1]*dim(tensor)[3]
-  return(numPres/numPos)
+  numPresent = NumSigs(tensor)
+  numPossible = dim(tensor)[1]*dim(tensor)[3]
+  return(numPresent/numPossible)
 }
 
 GetLmGenes = function(type='symbol'){
   file = DataFile('metadata/L1000_CD_landmark_geneInfo.txt')
   lmGeneInfo = Factor2Char(read.table(file, header=TRUE, sep='\t'))
-
   if(type == 'symbol'){
     out = lmGeneInfo$gene_symbol
   }else if(type == 'entrez'){
@@ -171,6 +172,8 @@ TensorDEG = function(X, normGene=FALSE, method='tensor', percDEG=2, symmetric=FA
   return(list(D=D, p=p_actual))
 }
 
+# x is a gene expression profile
+# p is the percentile threshold (between 0 and 1)
 CallDEG = function(x, p, symmetric=FALSE){
   d = x
   d[which(!is.na(x))] = 0
@@ -213,7 +216,6 @@ ComputeCellSpecificity = function(X, normalize=FALSE){
   cs = rep(NA, times=nDrug)
   r = list()
   for(d in 1:nDrug){
-    #print(d)
     C = A
     for(c1 in 1:nCell){ 
       x = X[d,,c1]

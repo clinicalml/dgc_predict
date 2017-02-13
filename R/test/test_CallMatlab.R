@@ -1,4 +1,4 @@
-TestStartMatlab(){
+TestStartMatlab = function(){
   # See TestMatlab below, this essentially tests whether Matlab has been started appropriately
 }
 
@@ -14,5 +14,10 @@ TestMatlab = function(mat=get0('matlab')){
   return(working)
 }
 
-TestCrossValidateTensor(){}
-TestCompleteTensor(){}
+TestCrossValidateTensor = function(){
+  warning('add test')
+}
+
+TestCompleteTensor= function(){
+  warning('add test')
+}

@@ -1,11 +1,9 @@
-function.names = c(GetFunctionNames('R/src/Utils.R'), 
-                    GetFunctionNames('R/src/DataProc.R'),
-                    GetFunctionNames('R/src/TensorROC.R'),
-                    GetFunctionNames('R/src/DefineTensor.R'))
+files = c('Utils', 'DataProc', 'DefineTensor', 'EvaluateTensor', 'CallMatlab', 'GSEA')
+functionNames = as.character(unlist(sapply(files, function(file) GetFunctionNames(sprintf('R/src/%s.R', file)))))
 
-for (i in 1:length(function.names)){
-  func = paste('Test', function.names[i], '()', sep='')
-  cat(paste(func, '...', sep=''))
-  eval(parse(text=func))
-  cat(' passed\n')
+for(func in functionNames){
+ funcName = paste('Test', func, '()', sep='')
+ cat(paste(func, '...', sep=''))
+ eval(parse(text=funcName))
+ cat(' passed\n')
 }

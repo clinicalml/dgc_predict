@@ -18,13 +18,14 @@ CrossValidateTensor = function(matlab, tensor, methods=c('mean','mean2', 'knn', 
   PCT = as.vector(getVariable(matlab, 'PCT')$PCT)
   PCTf = getVariable(matlab, 'PCTf')$PCTf
   n = length(methods)
-  stopifnot(length(out) == n^2)
+  stopifnot(length(out) == n)
   if(n > 1){
-    outR = lapply(1:n, function(i) out[[i]][[1]])
+    outR = lapply(1:n, function(i){A = out[[i]][[1]]; dimnames(A) = dimnames(tensor); return(A)})
     names(outR) = methods
     colnames(PCTf) = methods
   }else{
     outR = out[[1]][[1]]
+    dimnames(outR) = dimnames(tensor)
     PCTf = as.vector(PCTf)
   }
   names(PCT) = methods
@@ -33,7 +34,9 @@ CrossValidateTensor = function(matlab, tensor, methods=c('mean','mean2', 'knn', 
 
 CompleteTensor = function(matlab, tensor, method){
   setVariable(matlab, method=method, T=tensor)
-  evaluate(matlab, 'args = GetArgs(method, [], [], size(T), []);')
+  evaluate(matlab, 'args = GetArgs(method, [], [], size(T));')
   evaluate(matlab, 'out = CompleteTensor(T, method, args);')
-  return(getVariable(matlab, 'out')$out)
+  out = getVariable(matlab, 'out')$out
+  dimnames(out) = dimnames(tensor)
+  return(out)
 }

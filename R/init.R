@@ -51,18 +51,22 @@ source('R/test/test_Utils.R')
 source('R/src/DataProc.R')
 source('R/test/test_DataProc.R')
 
-source('R/src/TensorROC.R')
-source('R/test/test_TensorROC.R')
-
 source('R/src/DefineTensor.R')
 source('R/test/test_DefineTensor.R')
 
-source('R/src/GSEA.R')
-source('R/src/Plot.R')
-source('R/src/CallMatlab.R')
 source('R/src/EvaluateTensor.R')
+source('R/test/test_EvaluateTensor.R')
+
+source('R/src/CallMatlab.R')
+source('R/test/test_CallMatlab.R')
+
+source('R/src/GSEA.R')
+source('R/test/test_GSEA.R')
+
+source('R/src/Plot.R')
 
 if(!exists('testAll') || testAll){
   source('R/test/test_all.R')
 }
+
 

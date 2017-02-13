@@ -97,7 +97,6 @@ for k = 1:maxIter
     if abs(norm(Mtest)- 1) < 1e-3
         normTestErr = ComputeError(Mtest, Y(Omega_test)/norm(Y(Omega_test)));
     end
-    fprintf('FaLRTC: iteration %d, test error = %0.4f, after normalization: %0.4f\n', k, testErr(k), normTestErr);
     if errList(k) < epsilon
         break;
     end
