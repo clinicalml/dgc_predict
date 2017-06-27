@@ -41,6 +41,8 @@ switch(model)
         args = GetKNNDrugCellArgs();
     case 'unfoldmc'
         args = GetUnfoldMCArgs();
+    case 'inftucker'
+        args = GetInfTuckerArgs();
     otherwise
         error('invalid model');
 end
@@ -146,4 +148,43 @@ end
 function args = GetUnfoldMCArgs()
 args.p = 1;
 args.unfold_dim = 1;
+end
+
+function args = GetInfTuckerArgs()
+args.data = {};
+args.data.beta = 2;
+
+args.model = [];
+args.model.dim = 3;
+args.model.loss = 'Gauss';
+args.model.em_total = 20;
+args.model.var_total = 20;
+args.model.verbose = 1;
+args.model.process = 'GP';
+args.model.lambda = 1;
+args.model.sigma2 = 1e-5;
+
+args.optimizer = [];
+args.optimizer.algorithm = @L1General2_PSSgb;
+args.optimizer.options.order = -1;
+args.optimizer.options.maxIter = 20;
+args.optimizer.options.verbose = 1;
+
+args.uparam = [];
+args.uparam.alpha = 1;
+args.uparam.decision = 1e-8;
+args.uparam.delta = 10;
+args.uparam.distance = 'Euclidean';
+args.uparam.gamma = 1;
+args.uparam.kreg = 1; %1e-3?
+args.uparam.norm_reg = 1;
+args.uparam.nu = 0.5;
+args.uparam.phi = 1;
+args.uparam.savestorage = 0;
+args.uparam.taper = 'Spherical';
+args.uparam.tau = 1;
+args.uparam.theta = 1;
+args.uparam.tol = 1e-3;
+args.uparam.type = 'rbf';
+args.uparam.weight = 1;
 end

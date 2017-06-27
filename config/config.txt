@@ -1,4 +1,4 @@
-LINCSPATH=/Users/rhodos/Desktop/Dropbox/LINCS/submission/dgc_predict/
-DATAPATH=/Users/rhodos/Desktop/Dropbox/LINCS/submission/data/
-RESULTSPATH=/Users/rhodos/Desktop/Dropbox/LINCS/submission/results/
+LINCSPATH=/Users/rhodos/Desktop/Research/LINCS/submission/dgc_predict/
+DATAPATH=/Users/rhodos/Desktop/Research/LINCS/submission/data/
+RESULTSPATH=/Users/rhodos/Desktop/Research/LINCS/submission/results/
 MTLABPATH=/Applications/MATLAB_R2016a.app/bin/matlab

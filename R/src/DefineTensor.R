@@ -61,6 +61,7 @@ SelectDataForTensor = function(info, pThresh=1, specificDose=FALSE,
     pertDf = data.frame(pert_id=uniquePerts, name=drugNames, n_cells=countPerDrug)
     pertDfKeep = ddply(pertDf,  'name', summarise, pert_id=pert_id[which.max(n_cells)])
     info = subset(info, pert_id %in% pertDfKeep$pert_id)
+    if(print){print(sprintf('After removing duplicate pert ids: %s', SummarizeInfo(info)))}
   }
  
   #### FIRST TRY ONE ORDERING
@@ -116,6 +117,8 @@ SelectDataForTensor = function(info, pThresh=1, specificDose=FALSE,
   if(!identical(info1, info2)){
     stop('Results from two data selection orderings is not the same, please check.')
   }
+  
+  info1 = info1[!base::duplicated(info1),]
   
   return(info1)
 }

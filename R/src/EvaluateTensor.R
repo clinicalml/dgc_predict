@@ -102,6 +102,11 @@ ComputePCTPerSig = function(T1, T2, format='df'){
   return(out)
 }
 
+ComputeErrorRate = function(T_meas, T_pred){
+  list[x_meas, x_pred] = Tensor2Vec(T_meas, T_pred)
+  Norm2(x_meas-x_pred)^2 / Norm2(x_meas)^2
+}
+
 Tensor2Vec = function(T1, T2){
   x1 = as.vector(T1)
   x2 = as.vector(T2)
@@ -117,3 +122,4 @@ Tensor2Vec = function(T1, T2){
   
   return(list(x1=x1, x2=x2))
 }
+

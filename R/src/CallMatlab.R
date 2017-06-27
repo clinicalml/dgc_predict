@@ -11,7 +11,7 @@ StartMatlab = function(mat = get0('matlab')){
   return(mat)
 }
 
-CrossValidateTensor = function(matlab, tensor, methods=c('mean','mean2', 'knn', 'fa_lrtc'), exp_name='test', nFolds=10, maxFolds=10, saveFile=FALSE){
+CrossValidateTensor = function(matlab, tensor, methods=c('mean','mean2', 'knnd', 'fa_lrtc'), exp_name='test', nFolds=10, maxFolds=10, saveFile=FALSE){
   setVariable(matlab, methods=methods, tensor=tensor, exp_name=exp_name, nFolds=nFolds, maxFolds=maxFolds)
   evaluate(matlab, '[cvTensors, PCT, PCTf] = TensorCV4(methods, tensor, exp_name, nFolds, maxFolds);')
   out = getVariable(matlab, 'cvTensors')$cvTensors

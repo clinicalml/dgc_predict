@@ -49,6 +49,8 @@ else
             str = 'KNNDrugCell';
         case 'unfoldmc'
             str = 'UnfoldMC';
+        case 'inftucker'
+            str = 'InfTucker';
         otherwise
             error('unexpected model')
     end
