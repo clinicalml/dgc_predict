@@ -23,6 +23,11 @@ TestComputePCTPerSig = function(){
   #PCTs = ComputePCTPerSig(T1, T2, format='df')
 }
 
+TestComputeErrorRate = function(){
+  warning('add test')
+  #errRate = ComputeErrorRate(T1, T2)
+}
+
 TestTensor2Vec = function(){
   warning('add test')
   #vec = Tensor2Vec(T1, T2)

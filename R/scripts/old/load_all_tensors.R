@@ -4,7 +4,6 @@ library(rhdf5)
 # Read all tensor data from large tensor experiments
 
 tensors = list()
-tsize = 'large'
 
 print('Loading data tensor..')
 tensors$meas = LoadTensorMat(DataDir(sprintf('tensors/%s.mat', tsize)))$tensor

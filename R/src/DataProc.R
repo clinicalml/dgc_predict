@@ -300,7 +300,73 @@ LoadTensorMat = function(file){
   return(list(tensor=tensor, pertIds=pertIds, geneIds=geneIds, cellIds=cellIds))
 }
 
+
+LoadTensors = function(tsize='small', print=FALSE, loadMergeAndPred=FALSE){
+  library(rhdf5)
+  tensors = list()
+  
+  if(print){print('Loading data tensor..')}
+  tensors$meas = LoadTensorMat(DataDir(sprintf('tensors/%s.mat', tsize)))$tensor
+  names(dimnames(tensors$meas)) = c('drug','gene','cell')
+  
+  if(print){print('Loading cross-validated tensors..')}
+  
+  file = ResultsDir(sprintf('%s/%s_tensor_results.mat', tsize, tsize))
+  
+  tensors$cv = list(mean=h5read(file, '#refs#/b'), mean2=h5read(file,'#refs#/c'),
+                    dnpp=h5read(file,'#refs#/d'), tensor=h5read(file,'#refs#/e'))
+  tensors$cv = lapply(tensors$cv, function(tensor){dimnames(tensor) = dimnames(tensors$meas); return(tensor)})
+  
+  if(loadMergeAndPred){
+    if(print){print('Loading completed tensors and then generating merged and predicted tensors...')}
+    for(method in c('mean', 'mean2','dnpp', 'tensor')){
+      if(print){print(method)}
+      
+      if(print){print('..completed tensor')}
+      
+      if(tsize == 'large'){
+        tcomp = h5read(ResultsDir(sprintf('large/hdf5/%s_final_hdf5.mat', method)),'T')
+      }else{
+        tcomp = LoadTensorMat(DataDir(sprintf('results/tsize/%s/%s_final.mat', tsize, method)))$tensor
+      }
+      
+      dimnames(tcomp) = dimnames(tensors$meas)
+      tcomp = NormSigs(tcomp)
+      
+      if(print){print('..merged tensor')}
+      mergeT = tensors$cv[[method]]
+      mergeT[is.na(mergeT)] = tcomp[is.na(mergeT)]
+      tensors$merge[[method]] = mergeT
+      
+      if(print){print('..predicted tensor')}
+      predT = tcomp
+      predT[!is.na(tensors$cv[[method]])] = NA
+      tensors$pred[[method]] = predT
+      stopifnot(NumSigs(tensors$pred[[method]]) + NumSigs(tensors$cv[[method]]) == NumSigs(tcomp))
+      
+      rm(predT, tcomp, mergeT)
+    }
+  }
+  return(tensors)
+}
+
 GetGeneIdsTensor = function(){
   load(DataDir('tensors/T50_1.RData'))
   return(dimnames(T_meas)[[2]])
+}
+
+CompletionMethods = function(version='matlab', knn=FALSE){
+  if(version == 'matlab'){
+    if(knn){methods=c('mean','mean2', 'knnd', 'fa_lrtc')}
+    else{methods=c('mean','mean2', 'dnpp', 'fa_lrtc')}
+  }else if(version == 'R'){
+    if(knn){methods=c('mean','mean2', 'knnd', 'tensor')}
+    else{methods=c('mean','mean2', 'dnpp', 'tensor')}
+  }else if(version == 'title'){
+    if(knn){methods = c('1D-Mean', '2D-Mean', 'KNN', 'Tensor')}
+    else{methods = c('1D-Mean', '2D-Mean', 'DNPP', 'Tensor')}
+  }else{
+    stop('Unexpected value for version')
+  }
+  return(methods)
 }

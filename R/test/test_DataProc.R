@@ -333,6 +333,17 @@ TestCheckColumnStructure = function(){
 
 TestLoadTensorMat = function(){}
 
+TestLoadTensors = function(){
+  tensors = LoadTensors(tsize='small', print=FALSE)
+  stopifnot(names(tensors) == c('meas', 'cv'))
+  stopifnot(dim(tensors$meas) == c(300, 978, 15))
+  stopifnot(names(tensors$cv) == CompletionMethods(version='R', knn=FALSE))
+  s = NumSigs(tensors$meas)
+  tmp = lapply(tensors$cv, function(tensor) stopifnot(NumSigs(tensor) - s <= 10))
+  stopifnot(CheckColumnStructure(tensors$meas))
+  tmp = lapply(tensors$cv, function(tensor) stopifnot(CheckColumnStructure(tensor)))
+}
+
 TestGetGeneIdsTensor = function(){
   geneIds = GetGeneIdsTensor()
   stopifnot(length(geneIds)==978)
@@ -340,3 +351,5 @@ TestGetGeneIdsTensor = function(){
   stopifnot(geneIds[1] == '5720')
   stopifnot(geneIds[978] == '874')
 }
+
+TestCompletionMethods = function(){}

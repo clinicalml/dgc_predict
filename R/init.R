@@ -63,6 +63,9 @@ source('R/test/test_CallMatlab.R')
 source('R/src/GSEA.R')
 source('R/test/test_GSEA.R')
 
+source('R/src/Ensemble.R')
+source('R/test/test_Ensemble.R')
+
 source('R/src/Plot.R')
 
 if(!exists('testAll') || testAll){
