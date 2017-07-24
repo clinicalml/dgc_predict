@@ -67,6 +67,22 @@ MapEntrez2Hugo = function(entrez_ids){
   return(out)
 }
 
+MapEntrezToSymbol = function(entrez_ids, lm, map=NA){
+  if(is.na(map)){
+    if(lm){
+      map = GetLmGenes('all')
+    }else{
+      load(DataDir('metadata/hgnc_to_entrez.RData'))
+    }
+  }
+  stopifnot(c('gene_id', 'gene_symbol') %in% names(map))
+  idx = match(entrez_ids, map$gene_id)
+  if(all(is.na(idx))){
+    warning('no ids matched')
+  }
+  return(map$gene_symbol[idx])
+}
+
 MapUniprot2Entrez = function(proteins, printFlag=TRUE, collapse=FALSE){
   map = MapEntrez2Uniprot()
   p2e = list()

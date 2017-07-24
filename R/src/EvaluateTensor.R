@@ -107,6 +107,11 @@ ComputeErrorRate = function(T_meas, T_pred){
   return(Norm2(x_meas-x_pred)^2 / Norm2(x_meas)^2)
 }
 
+ComputeSqrtErrRate = function(T_meas, T_pred){
+  list[x_meas, x_pred] = Tensor2Vec(T_meas, T_pred)
+  return(Norm2(x_meas - x_pred) / Norm2(x_meas))
+}
+
 Tensor2Vec = function(T1, T2){
   x1 = as.vector(T1)
   x2 = as.vector(T2)
