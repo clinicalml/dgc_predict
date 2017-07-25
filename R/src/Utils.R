@@ -203,6 +203,20 @@ ZScore = function(x){
   return( (x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE))
 }
 
+ComputeAUC <- function(est, labels, computeROC=FALSE, abs=TRUE){
+  if(abs){est = abs(est)}
+  pred = prediction(est,labels)
+  auc = performance(pred, measure = "auc")
+  if(computeROC){
+    perf = performance(pred, measure = "tpr", x.measure = "fpr")
+    roc = data.frame(fpr=unlist(perf@x.values),tpr=unlist(perf@y.values))
+    out = list(auc=auc@y.values[[1]], roc=roc)
+  }else{
+    out = auc@y.values[[1]]
+  }
+  return(out)
+}
+
 #### data frame helper functions ###################################################################
 
 FixNAStrings = function(df, printFlag=FALSE){
