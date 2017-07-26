@@ -88,7 +88,15 @@ save(ROC, params, file=ResultsDir('applications/sda_side_effects_v2.RData'))
 
 ### Let's plot these results
 R = melt(ROC)
-names(R) = c('ROC', 'eval_type', 'obs_type', 'feature_type', 'side_effect')
-R = split(R, R$obs_type)
-R = merge(R$full, R$obs, by=c('feature_type', 'side_effect'), all=TRUE, suffixes=c('.full','.obs'))
-ggplot(rr, aes(x=ROC.obs, y=ROC.full)) + geom_point() + geom_abline(intercept=0, slope=1)
+names(R) = c('ROC', 'eval', 'obs', 'feature', 'label')
+
+
+Rmeas = subset(R, eval=='eval_meas')
+Rmeas$obs
+
+S = cast(R, ROC ~ obs)
+#R = split(R, R$obs)
+#R = merge(R$full, R$obs, by=c('feature_type', 'side_effect'), all=TRUE, suffixes=c('.full','.obs'))
+p = ggplot(R, aes(x=ROC.obs, y=ROC.full)) + geom_point() + geom_abline(intercept=0, slope=1)
+p = p + facet_wrap()
+p <- p + facet_wrap( ~ day, ncol=2)
