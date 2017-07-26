@@ -1,3 +1,4 @@
+library(ROCR)
 
 SubsetTensorDims = function(tensorWithDesiredDims, tensorToSubset){
   return(tensorToSubset[dimnames(tensorWithDesiredDims)[[1]], 
@@ -210,16 +211,31 @@ CallDEG = function(x, p, symmetric=FALSE){
   return(d)
 }
 
-ComputeAUC = function(est, labels, computeROC=FALSE, abs=TRUE){
-  if(abs){est = abs(est)}
-  pred = prediction(est,labels)
-  auc = performance(pred, measure = "auc")
-  if(computeROC){
-    perf = performance(pred, measure = "tpr", x.measure = "fpr")
-    roc = data.frame(fpr=unlist(perf@x.values),tpr=unlist(perf@y.values))
-    out = list(auc=auc@y.values[[1]], roc=roc)
+ComputeAUC = function(est, labels, computeROC=FALSE, abs=TRUE, na.rm=FALSE){
+  if(na.rm){
+    idxNA = which(is.na(est))
+    idxLab = which(is.na(labels))
+    idxRemove = union(idxNA, idxLab)
+    if(length(idxRemove) > 0){
+      print(sprintf('  removing %d missing values in ComputeAUC', length(idxRemove)))
+      est = est[-idxRemove]
+      labels = labels[-idxRemove]
+    }
+  }
+  if(length(unique(labels)) != 2){
+    warning(sprintf('labels have %d unique entries, should have 2', length(unique(labels))))
+    out = NA
   }else{
-    out = auc@y.values[[1]]
+    if(abs){est = abs(est)}
+    pred = prediction(est,labels)
+    auc = performance(pred, measure = "auc")
+    if(computeROC){
+      perf = performance(pred, measure = "tpr", x.measure = "fpr")
+      roc = data.frame(fpr=unlist(perf@x.values),tpr=unlist(perf@y.values))
+      out = list(auc=auc@y.values[[1]], roc=roc)
+    }else{
+      out = auc@y.values[[1]]
+    }
   }
   return(out)
 }

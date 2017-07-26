@@ -1,102 +1,124 @@
+setwd('~/projects/dg/dgc_predict/')
 
-testAll = FALSE
-source('R/init.R')
+### Setup parallelization and load dependencies
+library(doParallel)
+cl = makeCluster(26)
+registerDoParallel(cl)
 
-#library(sda)
+options(error=recover)
+library(RSQLite)
+source('R/src/DataProc.R')
+source('R/src/Utils.R')
+
 library(caret)
 set.seed(123)
 
-### Load gene expression features
+### Run params
+debug = FALSE
+save = FALSE
+plot = FALSE
+dim = 100
+
+### Load gene expression features. For now, remove concatenated features since
+### it takes longer, and remove cv features
 print('loading data...')
 load(DataDir('expr/drug/tensor_features_for_drug_property_prediction.RData'))
+L = L[setdiff(names(L), 'cat')]
+L = lapply(L, function(x) x[setdiff(names(x), 'cv')])
 
-### For now, remove concatenated features since it takes longer
-X = X[setdiff(names(X), 'cat')]
-Nf = length(X)
 
-### Also remove cv features
-X = lapply(X, function(x) x[setdiff(names(x), 'cv')])
+### Load label matrices
+load(DataDir('all_labels/all_labels.RData'))
 
-### Load SE matrices
-SE = read.table(DataDir('side_effect/sider_sliced.csv'), sep=',', header=TRUE, row.names=1)
-Ns = ncol(SE)
-
-### TODO: Concatenate side effects, ADRs, targets, and ATC codes together
-
-### Setup caret parameters
-fitControl = trainControl(method = 'cv', number = 10, classProbs = TRUE,
-                          summaryFunction = twoClassSummary, savePredictions='final')
-pGrid = expand.grid(lambda=seq(0, 1, 0.15), diagonal=c(TRUE, FALSE))
-
-### For each input feature type, run SDA (shrinkage discriminant analysis)
-ROC = list()
-params = list()
-#nG = 5
-
-for(s in 1:Ns){
-  se = colnames(SE)[s]
-  ROC[[se]] = list()
-  
-  for(f in 1:Nf){
-    
-    feat = names(X)[f]
-    ROC[[se]][[feat]] = list()
-    
-    # Get measured drugs
-    x = X[[f]]$obs[rownames(SE),]
-    measIdx = which(!is.na(x[,1]))
-    impIdx = which(is.na(x[,1]))
-   
-    for(t in 1:length(X[[f]])){
-      t_type = names(X[[f]])[t]
-      ROC[[se]][[feat]][[t_type]] = list()
-      
-      print(sprintf('Predicting %s with %s (%s) features', se, feat, t_type))
-      
-      # Construct data matrix
-      x = X[[f]][[t]][rownames(SE),]
-      x = x[!is.na(x[,1]),] # remove missing signatures in the case of only measured data
-
-      # Identify side effect labels
-      labels = factor(SE[rownames(x),s], levels=c(0,1), labels=c('neg','pos'))
-      
-      # Run model
-      capture.output(out <- train(x=x, y=labels, preProcess='center', method='sda', trControl=fitControl,
-                  verbose=FALSE, tuneGrid=pGrid, metric='Kappa'))
-      
-      cvMeas = which(out$pred$rowIndex %in% measIdx)
-      cvImp = which(out$pred$rowIndex %in% impIdx)
-      
-      ROC[[se]][[feat]][[t_type]]$all = max(out$results$ROC)
-      ROC[[se]][[feat]][[t_type]]$meas = ComputeAUC(est = out$pred[cvMeas,'pos'], 
-                                                    labels = as.numeric(out$pred$obs[cvMeas]) - 1)
-      
-      if(length(cvImp) > 0){
-        ROC[[se]][[feat]][[t_type]]$imp = ComputeAUC(est = out$pred[cvImp,'pos'],
-                                                     labels = as.numeric(out$pred$obs[cvImp]) - 1)
-      }else{
-        ROC[[se]][[feat]][[t_type]]$imp = NA
-      }
-
-      params[[se]][[feat]][[t_type]] = out$bestTune
-      
-    }
+### Reduce both L and Y if in debug mode
+if(debug){
+  L = L[c(1,3)]
+  for(i in 1:2){
+    L[[i]]$obs = L[[i]]$obs[,1:5]
+    L[[i]]$full = L[[i]]$full[,1:5]
   }
+  
+  Y = Y[,c(1, 19, 25)]
 }
 
-save(ROC, params, file=ResultsDir('applications/sda_side_effects_v2.RData'))
+### Reduce dimensionality of input
+L = lapply(L, function(xx) lapply(xx, function(x){
+
+
+### Setup caret parameters
+fitControl = trainControl(method=ifelse(debug, 'LOOCV', 'cv'), number=10, classProbs=TRUE, allowParallel=TRUE,
+                          summaryFunction=twoClassSummary, savePredictions='final')
+if(debug){
+  pGrid = expand.grid(lambda=0, diagonal=TRUE)
+}else{
+  pGrid = expand.grid(lambda=seq(0, 1, 0.15), diagonal=c(TRUE, FALSE))
+}
+
+
+### For each input feature type, run SDA (shrinkage discriminant analysis)
+
+
+#system.time(out <- foreach(y = colnames(Y), .packages=c('caret','ROCR')) %dopar% {
+for(y in colnames(Y)){
+  ROC = list()
+  params = list()
+  y_perts = rownames(Y)[!is.na(Y[,y])]
+
+  for(f in names(L)){
+
+    # Get measured drugs
+    Xmeas = L[[f]]$obs[y_perts,]
+    measPerts = rownames(Xmeas)[!is.na(Xmeas[,1])]
+    impPerts = rownames(Xmeas)[is.na(Xmeas[,1])]
+   
+    for(subset in names(L[[f]])){
+      print(sprintf('Predicting %s with %s (%s) features', y, f, subset))
+      
+      # Construct data matrix
+      X = L[[f]][[subset]][y_perts,]
+      X = X[!is.na(X[,1]),] # remove missing signatures in the case of only measured data
+
+      # Identify side effect labels
+      labels = factor(Y[rownames(X),y], levels=c(0,1), labels=c('neg','pos'))
+      labels_v = as.numeric(labels) - 1
+      names(labels_v) = rownames(X)
+      
+      # Run model
+      capture.output(out <- caret::train(x=X, y=labels, preProcess='center', method='sda',
+                                  trControl=fitControl, verbose=FALSE, tuneGrid=pGrid, metric='ROC'))
+      rownames(out$pred) = rownames(X)[out$pred$rowIndex]
+      
+      roc = list(eval_all = max(out$results$ROC), eval_meas=ComputeAUC(est = out$pred[measPerts,'pos'], labels=labels_v[measPerts]))
+      roc$eval_imp = ifelse(length(impPerts)>0, ComputeAUC(est=out$pred[impPerts,'pos'], labels=labels_v[impPerts]),NA)
+
+      params[[y]][[f]][[subset]] = out$bestTune
+      ROC[[y]][[f]][[subset]] = roc
+      #params[[f]][[subset]] = out$bestTune
+      #ROC[[f]][[subset]] = roc
+    }
+  }
+  #return(list(p=params, R=ROC))
+  #return(ROC)
+}
+
+if(debug){
+  load(ResultsDir(sprintf('sda%s.RData', ifelse(debug, '_debug', ''))))
+  stopifnot(identical(ROC_save, ROC))
+  stopifnot(identical(params_save, params))
+  print('Test passed')
+}
+
+
+if(save){
+  save(ROC, params, file=ResultsDir(sprintf('sda%s.RData', ifelse(debug, '_debug', ''))))
+}
+
 
 ### Let's plot these results
-R = melt(ROC)
-names(R) = c('ROC', 'eval', 'obs', 'feature', 'label')
-
-
-Rmeas = subset(R, eval=='eval_meas')
-Rmeas$obs
-
-S = cast(R, ROC ~ obs)
-#R = split(R, R$obs)
-#R = merge(R$full, R$obs, by=c('feature_type', 'side_effect'), all=TRUE, suffixes=c('.full','.obs'))
-p = ggplot(R, aes(x=ROC.obs, y=ROC.full)) + geom_point() + geom_abline(intercept=0, slope=1)
-p = p + facet_wrap()
-p <- p + facet_wrap( ~ day, ncol=2)
+if(plot){
+  R = melt(ROC)
+  names(R) = c('ROC', 'eval_type', 'obs_type', 'feature_type', 'side_effect')
+  R = split(R, R$obs_type)
+  R = merge(R$full, R$obs, by=c('feature_type', 'side_effect'), all=TRUE, suffixes=c('.full','.obs'))
+  ggplot(rr, aes(x=ROC.obs, y=ROC.full)) + geom_point() + geom_abline(intercept=0, slope=1)
+}
