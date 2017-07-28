@@ -1,4 +1,4 @@
-
+library(ggrepel)
 
 Heatmap = function(C, main=NULL, key=TRUE, file=NULL, margins=c(1,1),
                     colorLim=range(C), colors=c('white', 'blue'), dendrogram='none'){
@@ -116,7 +116,7 @@ FancyScatter = function(x, y, xlim=c(0,1), ylim=c(0,1), diag=TRUE,
                        color = 'blue', size=1, xlab='', ylab='', circle=NULL, main='',
                        minCount=NULL, maxColor=NULL, cLim = c('red', 'blue'),
                        palette=NULL, print=TRUE, shape=16, alpha=1, legend.position=NULL,
-                       legend.title='', filename=NULL, dodge=0.9){
+                       legend.title='', filename=NULL, dodge=0.9, facet_var=NULL){
   if(!is.null(minCount)){
     idx = which(color >= minCount)
     x = x[idx]
@@ -128,7 +128,7 @@ FancyScatter = function(x, y, xlim=c(0,1), ylim=c(0,1), diag=TRUE,
     color[color >= maxColor] = maxColor
   }
   
-  df = data.frame(x=x, y=y, color=color, size=size)
+  df = data.frame(x=x, y=y, color=color, size=size, facet_var=facet_var)
   
   p = ggplot(df, aes(x=x, y=y, color=color, size=size, shape=shape, label=labels)) +
     geom_point(alpha=alpha) +
