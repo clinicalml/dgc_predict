@@ -17,7 +17,7 @@ set.seed(123)
 debug = FALSE
 save = FALSE
 plot = FALSE
-dim = 100
+dim = 'full'
 
 ### Load gene expression features. For now, remove concatenated features since
 ### it takes longer, and remove cv features
@@ -119,6 +119,7 @@ Outcome2Category = function(outcome){
 library(plotly)
 library(ggplot2)
 library(reshape2)
+library(ggrepel)
 
 R = melt(ROC)
 names(R) = c('ROC', 'eval_type', 'obs_type', 'feature_type', 'outcome')
@@ -134,19 +135,33 @@ R2 = split(R2, R2$obs_type)
 R2 = merge(R2$full, R2$obs, by=c('feature_type', 'outcome'), all=TRUE, suffixes=c('.full','.obs'))
 p = ggplot(R2, aes(x=ROC.obs, y=ROC.full)) +
   geom_rect(data=r, aes(fill=category), xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf,
-          alpha = 0.4) +
-  geom_point() + 
-  geom_abline(intercept=0, slope=1) + 
+            alpha = 0.4) +
+  geom_point() +
+  geom_abline(intercept=0, slope=1) +
   geom_hline(yintercept=0.5, col='DarkGrey', linetype=2) +
   geom_vline(xintercept=0.5, col='DarkGrey', linetype=2) +
-  facet_wrap(~outcome) + 
+  geom_text_repel(data=R2, aes(x=ROC.obs, y=ROC.full, label=feature_type), color='black',
+                  size=2, segment.size = 0.3, segment.color='black', 
+                  box.padding = unit(0.5, "lines"),
+                  point.padding = unit(0.1, "lines")) +
+  facet_wrap(~outcome) +
   scale_fill_brewer(palette='Set3') +
   xlab('AUC using ONLY MEASURED signatures') +
   ylab('AUC using MEASURED + IMPUTED signatures') +
   ggtitle('Does addition of imputed signatures improve classification accuracy?') +
-  theme(plot.title = element_text(hjust = 0.5))
-ggplotly(p)
+  theme(plot.title = element_text(hjust = 0.5)) +
+  xlim(c(0,1)) + ylim(c(0,1))
+#ggsave(plot=p, filename=PlotDir(sprintf('Does_imputation_help_dim%s.pdf', as.character(dim))), width=15, height=12)
 
+# Make box plots of AUC deltas, per feature and per outcome
+# Filter by cases where neither made it above 0.5 (?)
+A = subset(R2, ROC.full > 0.6 | ROC.obs > 0.6)
+A$delta = A$ROC.full - A$ROC.obs
+ggplot(A, aes(x=reorder(outcome, delta, FUN=median), y=delta, group=outcome, fill=category.full)) +
+  geom_boxplot() +
+  ggtitle('Change in AUC per prediction task when adding imputed signatures')
+
+ggplot(A, aes(x=reorder(feature_type, delta, FUN=median), y=delta, group=feature_type))
 
 # Then see if predictions on imputed vs. measured signatures have comparable AUCs
 R3 = RemoveDfColumns(subset(R, obs_type == 'full'), 'obs_type')
@@ -159,10 +174,38 @@ p2 = ggplot(R3, aes(x=ROC.meas, y=ROC.imp)) +
   geom_abline(intercept=0, slope=1) +
   geom_hline(yintercept=0.5, col='DarkGrey', linetype=2) +
   geom_vline(xintercept=0.5, col='DarkGrey', linetype=2) +
+  geom_text_repel(data=R3, aes(x=ROC.meas, y=ROC.imp, label=feature_type), color='black',
+                  size=2, segment.size = 0.3, segment.color='black', 
+                  box.padding = unit(0.5, "lines"),
+                  point.padding = unit(0.1, "lines")) +
   facet_wrap(~outcome) +
   scale_fill_brewer(palette='Set3') +
   xlab('AUC evaluated on data points with MEASURED signatures') +
   ylab('AUC evaluated on the remaining data points with IMPUTED signatures') +
   ggtitle('Do predictions on imputed vs. measured signatures have comparable AUCs?') +
-  theme(plot.title = element_text(hjust = 0.5))
-ggplotly(p2)
+  theme(plot.title = element_text(hjust = 0.5)) +
+  xlim(c(0,1)) + ylim(c(0,1))
+ggsave(plot=p2, filename=PlotDir(sprintf('Is_accuracy_comparable_dim%s.pdf', as.character(dim))), width=15, height=12)
+
+
+
+### Re-facet the first plot by feature type
+ggplot(R2, aes(x=ROC.obs, y=ROC.full)) +
+  #geom_rect(data=r, aes(fill=category), xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf,
+  #          alpha = 0.4) +
+  geom_point() +
+  geom_abline(intercept=0, slope=1) +
+  geom_hline(yintercept=0.5, col='DarkGrey', linetype=2) +
+  geom_vline(xintercept=0.5, col='DarkGrey', linetype=2) +
+  geom_text_repel(data=R2, aes(x=ROC.obs, y=ROC.full, label=outcome), color='black',
+                  size=2, segment.size = 0.3, segment.color='black', 
+                  box.padding = unit(0.5, "lines"),
+                  point.padding = unit(0.1, "lines")) +
+  facet_wrap(~feature_type) +
+  scale_fill_brewer(palette='Set3') +
+  xlab('AUC using ONLY MEASURED signatures') +
+  ylab('AUC using MEASURED + IMPUTED signatures') +
+  ggtitle('Does addition of imputed signatures improve classification accuracy?') +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  xlim(c(0,1)) + ylim(c(0,1))
+ggsave(filename=PlotDir())
