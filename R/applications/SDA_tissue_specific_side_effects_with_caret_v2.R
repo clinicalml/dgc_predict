@@ -1,9 +1,9 @@
 setwd('~/projects/dg/dgc_predict/')
 
-### Setup parallelization and load dependencies
-library(doParallel)
-cl = makeCluster(10)
-registerDoParallel(cl)
+# ### Setup parallelization and load dependencies
+# library(doParallel)
+# cl = makeCluster(10)
+# registerDoParallel(cl)
 
 options(error=recover)
 library(RSQLite)
@@ -41,8 +41,12 @@ if(debug){
 }
 
 ### Reduce dimensionality of input
-#L = lapply(L, function(xx) lapply(xx, function(x){
 
+L = lapply(L, function(xx) lapply(xx, function(x){
+  A = x[,1:dim]
+  out = prcomp(na.omit(x), rank. = dim)$x
+  A[rownames(out),] = out
+  return(A)}))
 
 ### Setup caret parameters
 fitControl = trainControl(method=ifelse(debug, 'LOOCV', 'cv'), number=10, classProbs=TRUE, allowParallel=TRUE,
@@ -64,9 +68,9 @@ for(y in colnames(Y)){
   for(f in names(L)){
 
     # Among drugs with labels for output y, identify which ones have measured vs. only imputed signatures
-    Xmeas = L[[f]]$obs[y_perts,]
-    meas = rownames(Xmeas)[!is.na(Xmeas[,1])]
-    imp = rownames(Xmeas)[is.na(Xmeas[,1])]
+    Xmeas = na.omit(L[[f]]$obs)
+    meas = intersect(rownames(Xmeas), y_perts)
+    imp = setdiff(y_perts, rownames(Xmeas))
    
     for(subset in names(L[[f]])){
       print(sprintf('Predicting %s with %s (%s) features', y, f, subset))
@@ -97,20 +101,20 @@ for(y in colnames(Y)){
 
 if(debug){
   load(ResultsDir(sprintf('sda%s.RData', ifelse(debug, '_debug', ''))))
-  stopifnot(identical(ROC_save, ROC))
-  stopifnot(identical(params_save, params))
+  stopifnot(unlist(compare::compare(ROC, ROC_save, allowAll = TRUE)$result))
+  stopifnot(unlist(compare::compare(params, params_save, allowAll = TRUE)$result))
   print('Test passed')
 }
 
 
 if(save){
-  save(ROC, params, file=ResultsDir(sprintf('sda%s.RData', ifelse(debug, '_debug', ''))))
+  save(ROC, params, file=ResultsDir(sprintf('sda_dim%s%s.RData', as.character(dim), ifelse(debug, '_debug', ''))))
 }
 
 
 ### Let's plot these results
 Outcome2Category = function(outcome){
-  out = sapply(outcome, function(x) unlist(strsplit(x, split='[.]'))[[1]])
+  out = sapply(as.character(outcome), function(x) unlist(strsplit(x, split='[.]'))[[1]])
   return(out)
 }
 
@@ -119,6 +123,7 @@ Outcome2Category = function(outcome){
 library(plotly)
 library(ggplot2)
 library(reshape2)
+library(ggrepel)
 
 R = melt(ROC)
 names(R) = c('ROC', 'eval_type', 'obs_type', 'feature_type', 'outcome')
@@ -134,19 +139,23 @@ R2 = split(R2, R2$obs_type)
 R2 = merge(R2$full, R2$obs, by=c('feature_type', 'outcome'), all=TRUE, suffixes=c('.full','.obs'))
 p = ggplot(R2, aes(x=ROC.obs, y=ROC.full)) +
   geom_rect(data=r, aes(fill=category), xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf,
-          alpha = 0.4) +
-  geom_point() + 
-  geom_abline(intercept=0, slope=1) + 
+            alpha = 0.4) +
+  geom_point() +
+  geom_abline(intercept=0, slope=1) +
   geom_hline(yintercept=0.5, col='DarkGrey', linetype=2) +
   geom_vline(xintercept=0.5, col='DarkGrey', linetype=2) +
-  facet_wrap(~outcome) + 
+  geom_text_repel(data=R2, aes(x=ROC.obs, y=ROC.full, label=feature_type), color='black',
+                  size=2, segment.size = 0.3, segment.color='black', 
+                  box.padding = unit(0.5, "lines"),
+                  point.padding = unit(0.1, "lines")) +
+  facet_wrap(~outcome) +
   scale_fill_brewer(palette='Set3') +
   xlab('AUC using ONLY MEASURED signatures') +
   ylab('AUC using MEASURED + IMPUTED signatures') +
   ggtitle('Does addition of imputed signatures improve classification accuracy?') +
-  theme(plot.title = element_text(hjust = 0.5))
-ggplotly(p)
-
+  theme(plot.title = element_text(hjust = 0.5)) +
+  xlim(c(0,1)) + ylim(c(0,1))
+ggsave(plot=p, filename=PlotDir(sprintf('Does_imputation_help_dim%s.pdf', as.character(dim))), width=15, height=12)
 
 # Then see if predictions on imputed vs. measured signatures have comparable AUCs
 R3 = RemoveDfColumns(subset(R, obs_type == 'full'), 'obs_type')
@@ -159,10 +168,15 @@ p2 = ggplot(R3, aes(x=ROC.meas, y=ROC.imp)) +
   geom_abline(intercept=0, slope=1) +
   geom_hline(yintercept=0.5, col='DarkGrey', linetype=2) +
   geom_vline(xintercept=0.5, col='DarkGrey', linetype=2) +
+  geom_text_repel(data=R3, aes(x=ROC.meas, y=ROC.imp, label=feature_type), color='black',
+                  size=2, segment.size = 0.3, segment.color='black', 
+                  box.padding = unit(0.5, "lines"),
+                  point.padding = unit(0.1, "lines")) +
   facet_wrap(~outcome) +
   scale_fill_brewer(palette='Set3') +
   xlab('AUC evaluated on data points with MEASURED signatures') +
   ylab('AUC evaluated on the remaining data points with IMPUTED signatures') +
   ggtitle('Do predictions on imputed vs. measured signatures have comparable AUCs?') +
-  theme(plot.title = element_text(hjust = 0.5))
-ggplotly(p2)
+  theme(plot.title = element_text(hjust = 0.5)) +
+  xlim(c(0,1)) + ylim(c(0,1))
+ggsave(plot=p2, filename=PlotDir(sprintf('Is_accuracy_comparable_dim%s.pdf', as.character(dim))), width=15, height=12)
