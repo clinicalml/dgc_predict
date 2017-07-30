@@ -1,6 +1,16 @@
 
 #### directory and file handling ###################################################################
 
+MakeDir = function(dir){
+  if(!dir.exists(dir)){
+    dir.create(dir)
+  }else{
+    warning('directory already exists!')
+  }
+  stopifnot(dir.exists(dir))
+}
+
+
 PlotDir = function(file, subdir=NULL){
   stopifnot(identical(normalizePath(getwd()), normalizePath(BaseDir())))
   plotDir = paste('plot', DateStr(), subdir, sep='/')

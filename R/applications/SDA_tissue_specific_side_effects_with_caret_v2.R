@@ -1,9 +1,9 @@
 setwd('~/projects/dg/dgc_predict/')
 
-# ### Setup parallelization and load dependencies
-# library(doParallel)
-# cl = makeCluster(10)
-# registerDoParallel(cl)
+### Setup parallelization and load dependencies
+library(doParallel)
+cl = makeCluster(10)
+registerDoParallel(cl)
 
 options(error=recover)
 library(RSQLite)
@@ -14,9 +14,8 @@ library(caret)
 set.seed(123)
 
 ### Run params
-debug = FALSE
-save = FALSE
-plot = FALSE
+debug = TRUE
+save = TRUE
 dim = 'full'
 
 ### Load gene expression features. For now, remove concatenated features since
