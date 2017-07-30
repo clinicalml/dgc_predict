@@ -1,5 +1,5 @@
 
-# I will just identify the top 3 ATC codes associated with drugs in the large tensor
+# I will just identify the top 6 ATC codes associated with drugs in the large tensor
 L = GetLincsAnnot()
 load('~/projects/side_info/data/annot/tensor_annot.RData')
 A = L[L$pert_id %in% annot$pertIds,]
@@ -13,7 +13,7 @@ for(letter in all_letters){
   n[[letter]] = length(which(sapply(atc_letters, function(ATC) letter %in% ATC)))
 }
 
-myATC = c('D','C','L')
+myATC = c('D','C','L','N','J','A')
 
 
 # Construct matrix
@@ -31,5 +31,5 @@ for(letter in myATC){
   ATCMatrix[pertIds,letter] = 1
 }
 
-write.table(ATCMatrix, file=DataDir('atc/top_3_atc_codes_in_large_tensor.csv'), 
+write.table(ATCMatrix, file=DataDir('atc/top_6_atc_codes_in_large_tensor.csv'), 
             sep=',', col.names=TRUE, row.names=TRUE)
