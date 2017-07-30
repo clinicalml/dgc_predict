@@ -25,7 +25,7 @@ for(i in 1:length(percDEG)){
 }
 
 #### PLOT ####################################################
-  tiff(PlotDir('ROC_tensor_dnpp_mean_mean2.tiff'), width=510, height=510)
+  tiff(PlotDir('ROC_DEGs.tiff'), width=510, height=510)
   lwd=5
   lty = c(1, 3)
   legend_str = c()
@@ -35,7 +35,7 @@ for(i in 1:length(percDEG)){
   
   for(i in 1:length(percDEG)){
     for(method in methods){
-      roc[[method]] = SubsetRoc(out[[method]][[i]]$roc, n_roc)
+      roc[[method]] = SubsetROC(out[[method]][[i]]$roc, n_roc)
     }
     lt = lty[i]
     
@@ -48,7 +48,9 @@ for(i in 1:length(percDEG)){
     lines(roc[['mean2']]$fpr, roc[['mean2']]$tpr, col=colors$mean2, lwd=lwd, type='l', lty=lt)
     lines(roc[['dnpp']]$fpr, roc[['dnpp']]$tpr, col=colors$dnpp, lwd=lwd, type='l', lty=lt)
     lines(roc[['tensor']]$fpr, roc[['tensor']]$tpr, col=colors$tensor, lwd=lwd, type='l',lty=lt)
+    #lines(roc[['ensemble']]$fpr, roc[['ensemble']]$tpr, col=colors$ensemble, lwd=lwd, type='l',lty=lt)
     
+    #legend_str = c(legend_str, sprintf('Ensemble, %0.0f%% DEG, AUC=%0.2f', percDEG[i], out[['ensemble']][[i]]$auc))
     legend_str = c(legend_str, sprintf('Tensor, %0.0f%% DEG, AUC=%0.2f', percDEG[i], out[['tensor']][[i]]$auc))
     legend_str = c(legend_str, sprintf('DNPP, %0.0f%% DEG, AUC=%0.2f', percDEG[i], out[['dnpp']][[i]]$auc))
     legend_str = c(legend_str, sprintf('2D-Mean, %0.0f%% DEG, AUC=%0.2f', percDEG[i], out[['mean2']][[i]]$auc))

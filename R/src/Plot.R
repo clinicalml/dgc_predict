@@ -269,8 +269,9 @@ GetMethodColors = function(longName = FALSE){
               mean2=GetMethodColor('mean2'),
               dnpp = GetMethodColor('dnpp'),
               tensor=GetMethodColor('tensor'))
+             # ensemble=GetMethodColor('ensemble'))
   if(longName){
-    names(colors) = c('1D-Mean', '2D-Mean', 'DNPP', 'Tensor')
+    names(colors) = c('1D-Mean', '2D-Mean', 'DNPP', 'Tensor')#, 'Ensemble')
   }
   return(colors)
 }
@@ -297,8 +298,10 @@ PlotPCTf = function(listPCTf, main){
 
 PlotDataAvailabilityInTensor = function(tensor, main='', xAxisLabSize=6, labSize=28){
   A = MatrixCast(!is.na(tensor[,1,]), type='numeric')
-  print(GHeatmap(A, rowLab=FALSE, colLab=TRUE, dims=c('drugs', 'cells'), 
-                 main=main, legend=FALSE, xAxisLabSize=xAxisLabSize, labSize=labSize))
+  p = GHeatmap(A, rowLab=FALSE, colLab=TRUE, dims=c('drugs', 'cells'), 
+           main=main, legend=FALSE, xAxisLabSize=xAxisLabSize, labSize=labSize)
+  print(p)
+  return(p)
 }
 
 GMultiHeatmap = function(MList, clusterRows=FALSE, colLab=TRUE, rowLab=TRUE,

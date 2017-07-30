@@ -1,3 +1,3 @@
-LINCSPATH=/home/rhodos/projects/dg/dgc_predict/
-DATAPATH=/home/rhodos/projects/dg/data/
-RESULTSPATH=/home/rhodos/projects/dg/results/
+LINCSPATH=/Users/rhodos/Desktop/Research/LINCS/submission/dgc_predict/
+DATAPATH=/Users/rhodos/Desktop/Research/LINCS/submission/data/
+RESULTSPATH=/Users/rhodos/Desktop/Research/LINCS/submission/results/
