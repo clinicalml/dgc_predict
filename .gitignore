@@ -1,1 +1,3 @@
-config/config.txt
+config.txt
+*.RData
+*.mat

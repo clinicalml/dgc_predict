@@ -16,7 +16,7 @@ set.seed(123)
 ### Run params
 debug = FALSE
 save = TRUE
-models = c('regLogistic', 'parRF', 'knn')
+models = c('regLogistic', 'parRF', 'knn', 'sda')
 
 ### Setup results dir
 if(!debug){

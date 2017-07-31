@@ -25,7 +25,7 @@ BaseDir = function(){
 }
 
 GetConfig = function(key){
-  a = system("cat config/config.txt;", intern=T)
+  a = system("cat config.txt;", intern=T)
   b = unlist(strsplit(a,"="))
   return(b[which(b==key)+1])
 }
