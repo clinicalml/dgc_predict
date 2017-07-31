@@ -41,7 +41,7 @@ df2 = ChangeColumnName(D2, from='.id', to='method')
 df2$method = as.factor(df2$method)
 df2$method = revalue(df2$method, c('mean'='1D-Mean', 'mean2'='2D-Mean', 'knnd'='DNPP', 'fa_lrtc'='Tensor'))
 
-if(writeToFile){tiff(file=PlotDir('obs_density.tiff'), width=640)}
+#if(writeToFile){tiff(file=PlotDir('obs_density.svg'), width=640)}
 p = ggplot(df2, aes(x=density, y=corr, color=method, group=method, linetype=method)) +
   geom_errorbar(aes(ymin=corr-sd, ymax=corr+sd), size=1, width=0.1, lty=1, show.legend = FALSE) +
   geom_line(size=2) + 
@@ -56,5 +56,6 @@ p = ggplot(df2, aes(x=density, y=corr, color=method, group=method, linetype=meth
   scale_linetype_manual(values=unlist(list(`1D-Mean`=2,`2D-Mean`=4,`DNPP`=5,`Tensor`=1))) +
   ylim(c(0.2,0.7))
 print(p)
-if(writeToFile){dev.off()}
+ggsave(PlotDir('obs_density.svg'), height=7, width=8)
+#if(writeToFile){dev.off()}
 

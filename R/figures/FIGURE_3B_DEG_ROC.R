@@ -25,7 +25,7 @@ for(i in 1:length(percDEG)){
 }
 
 #### PLOT ####################################################
-  tiff(PlotDir('ROC_DEGs.tiff'), width=510, height=510)
+  pdf(PlotDir('ROC_DEGs.pdf'), width=8, height=7)
   lwd=5
   lty = c(1, 3)
   legend_str = c()
