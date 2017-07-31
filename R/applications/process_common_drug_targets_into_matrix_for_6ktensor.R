@@ -1,10 +1,8 @@
 
-# I will just identify targets associated with >= 20 drugs in the large tensor
 L = GetLincsAnnot()
-#load('~/projects/side_info/data/annot/tensor_annot.RData')
-load('~/Desktop/Research/LINCS/submission/data/metadata/tensor_annot.RData')
+load(DataDir('metadata/tensor_annot_6k.RData'))
 
-A = L[L$pert_id %in% annot$pertIds,]
+A = L[L$pert_id %in% annot[[1]],]
 targets_list = Str2Vec(na.omit(A$targets), split=':')
 targets = unique(unlist(targets_list))
 tCount = sapply(targets, function(tar){length(which(sapply(
@@ -32,5 +30,5 @@ a = apply(targetMatrix, 2, sum)
 b = tCount[tCount >= 20]
 stopifnot(all(a==b))
 
-write.table(targetMatrix, file=DataDir('targets/top_7_targets_in_large_tensor.csv'), 
+write.table(targetMatrix, file=DataDir('targets/top_targets_in_6ktensor.csv'), 
             sep=',', col.names=TRUE, row.names=TRUE)

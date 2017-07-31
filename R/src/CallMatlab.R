@@ -40,3 +40,4 @@ CompleteTensor = function(matlab, tensor, method){
   dimnames(out) = dimnames(tensor)
   return(out)
 }
+
