@@ -1,7 +1,7 @@
 TestComputeGCP = function(){
   set.seed(123)
-  T1 = MakeRandomTensor()
-  T2 = list(test_tensor = MakeRandomTensor())
+  T1 = MakeTensor()
+  T2 = list(test_tensor = MakeTensor())
   GCP = ComputeGCP(T1, T2, plot=FALSE, subset='cv', file=NA, print=FALSE)
   
   # Test: should be looking at correlations between a bunch of random small
@@ -11,7 +11,7 @@ TestComputeGCP = function(){
 
 TestComputePCT = function(){
   set.seed(123)
-  T1 = MakeRandomTensor()
+  T1 = MakeTensor()
   T2 = T1
   
   # Check that even if I remove different random elements from each of T1 and
@@ -35,7 +35,7 @@ TestComputePCT = function(){
 
 TestComputePCT_AllModes = function(){
   set.seed(123)
-  T1 = MakeRandomTensor(nCells=10)
+  T1 = MakeTensor(nCells=10)
   list[nDrug, nGene, nCell] = dim(T1)
  
   # Add increasing noise per drug
@@ -60,8 +60,8 @@ TestComputePCT_AllModes = function(){
 TestComputePCTPerSig = function(){
   # Make two random tensors, and set one equal to another in two locations
   set.seed(123)
-  T1 = MakeRandomTensor()
-  T2 = MakeRandomTensor()
+  T1 = MakeTensor()
+  T2 = MakeTensor()
 
   T1[5,,1] = T2[5,,1]
   T1[10,,2] = T2[10,,2]
@@ -76,8 +76,8 @@ TestComputePCTPerSig = function(){
 }
 
 TestTensor2Vec = function(){
-  T1 = MakeRandomTensor(NA_frac=0.1)
-  T2 = MakeRandomTensor(NA_frac=0.1)
+  T1 = MakeTensor(NA_frac=0.1)
+  T2 = MakeTensor(NA_frac=0.1)
   nEntries = prod(dim(T1))
   list[x1,x2] = Tensor2Vec(T1, T2)
   stopifnot(abs(length(x1) - nEntries*0.81) < (nEntries/100) )
@@ -87,17 +87,33 @@ TestComputeCSpPres = function(){}
 
 #### Helper functions ####
 
-MakeRandomTensor = function(nDrugs=500, nGenes=10, nCells=2, NA_frac=0){
+MakeTensor = function(nDrugs=500, nGenes=10, nCells=2, NA_frac=0, fill=NA, removeSig_frac=0){
   nEntries = nDrugs * nGenes * nCells
   
   nm = list(drugs=paste0('drug.', AlphaNames(nDrugs)),
             genes=paste0('gene.', AlphaNames(nGenes)),
             cells=paste0('cell.', AlphaNames(nCells)))
 
-  tensor = array(data=rnorm(nEntries), dim=c(nDrugs,nGenes,nCells), dimnames=nm)
+  if(is.na(fill)){
+    tensor = array(data=rnorm(nEntries), dim=c(nDrugs,nGenes,nCells), dimnames=nm)
+  }else{
+    tensor = array(data=fill, dim=c(nDrugs,nGenes,nCells), dimnames=nm)
+  }
   
+  if(NA_frac > 0 && (removeSig_frac > 0|!is.na(fill))){
+    stop('NA_frac is not compatible with other arguments')
+  }
+
   if(NA_frac > 0){
+    stopifnot(NA_frac <= 1)
     tensor = RemoveRandomEltsFromTensor(tensor, NA_frac=NA_frac)
+  }else if(removeSig_frac > 0){
+    stopifnot(removeSig_frac <= 1)
+    idx = sample(nDrugs*nCells, size=nDrugs*nCells*removeSig_frac, replace=FALSE)
+    toRemove = melt(tensor[,1,])[idx,]
+    for(i in 1:nrow(toRemove)){
+      tensor[toRemove$drugs[i],,toRemove$cells[i]] = NA
+    }
   }
   
   return(tensor)

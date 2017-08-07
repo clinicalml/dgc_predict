@@ -1,14 +1,7 @@
 
 RunGsea = function(profile, dz_genes_up, dz_genes_down=NULL, minGeneSetSize=15, 
-                    doGSOA=FALSE, doGSEA=TRUE){
-  
-  GO_MF = GOGeneSets(species='Hs', ontologies=c('MF'))
-  GO_BP = GOGeneSets(species='Hs', ontologies=c('BP'))
-  GO_CC = GOGeneSets(species='Hs', ontologies=c('CC'))
-  PW_KEGG = KeggGeneSets(species='Hs')
-  ListGSC = list(GO_MF=GO_MF, GO_BP=GO_BP, GO_CC=GO_CC, PW_KEGG=PW_KEGG)
-  
-  cat('initializing gsca object...\n')
+                    doGSOA=FALSE, doGSEA=TRUE, ListGSC = GetListGSC()){
+   cat('initializing gsca object...\n')
   gsca = new('GSCA', listOfGeneSetCollections=ListGSC, geneList=profile, hits=as.character(c(dz_genes_up, dz_genes_down)))
   
   cat('preprocessing...\n')
@@ -19,7 +12,8 @@ RunGsea = function(profile, dz_genes_up, dz_genes_down=NULL, minGeneSetSize=15,
 
   gsca = analyze(gsca, para=list(pValueCutoff=0.05, pAdjustMethod='BH', nPermutations=1000, 
                                  minGeneSetSize=minGeneSetSize, exponent=1), doGSOA=doGSOA, doGSEA=doGSEA)
-  gsca = AppendGSTerms(gsca)
+  gsca = AppendGSTerms(gsca, go=names(ListGSC)[grepl('GO_', names(ListGSC))],
+                       kegg=ifelse('PW_KEGG' %in% names(ListGSC), 'PW_KEGG', NA))
   HTSanalyzeR::summarize(gsca)
   return(gsca)
 }
@@ -42,11 +36,19 @@ GetGSEAResultsV2 = function(gsca, colname='Pvalue', thresh=0.01, analysis='GSOA'
     y = x[[n]][,colname]
     out[[n]] = x[[n]][y <= thresh,]
   }
-  
+
   if(merge){
     geneSets = names(which(sapply(out, nrow) > 0))
     out = lapply(geneSets, function(name){out[[name]]$Gene.Set=name; return(out[[name]])})
     out = Reduce('rbind', out)
   }
   return(out)
+}
+
+GetListGSC = function(){
+  GO_MF = GOGeneSets(species='Hs', ontologies=c('MF'))
+  GO_BP = GOGeneSets(species='Hs', ontologies=c('BP'))
+  GO_CC = GOGeneSets(species='Hs', ontologies=c('CC'))
+  PW_KEGG = KeggGeneSets(species='Hs')
+  return(list(GO_MF=GO_MF, GO_BP=GO_BP, GO_CC=GO_CC, PW_KEGG=PW_KEGG))
 }

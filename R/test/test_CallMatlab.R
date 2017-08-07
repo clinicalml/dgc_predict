@@ -14,10 +14,33 @@ TestMatlab = function(mat=get0('matlab')){
   return(working)
 }
 
-TestCrossValidateTensor = function(){
-  warning('add test')
+TestCompleteTensor= function(mat = get0('matlab')){
+  matlab = StartMatlab()
+  tensorFull = MakeTensor(NA_frac=0, fill=5)
+  tensorNA = tensorFull
+  tensorNA[5,,1] = NA
+  tensorComplete = CompleteTensor(matlab, tensorNA, method='mean')
+  stopifnot(identical(tensorComplete, tensorFull))
+  
+  tensorComplete = CompleteTensor(matlab, tensorNA, method='mean2')
+  stopifnot(identical(tensorComplete, tensorFull))
+  
+  tensorComplete = CompleteTensor(matlab, tensorNA, method='knnd')
+  stopifnot(identical(tensorComplete, tensorFull))
+  
+  tensorComplete = CompleteTensor(matlab, tensorNA, method='fa_lrtc')
+  stopifnot(Norm2(tensorFull[5,,1]- tensorComplete[5,,1]) < 0.1)
+  
+  close(matlab)
+  rm(matlab)
 }
 
-TestCompleteTensor= function(){
-  warning('add test')
+
+TestCrossValidateTensor = function(mat = get0('matlab')){
+  # matlab = StartMatlab()
+  # tensor = MakeTensor(nDrugs=50, nCells=10, nGenes=50, NA_frac=0, fill=5, removeSig_frac=0.2)
+  # out = CrossValidateTensor(matlab, tensor, methods=c('mean'))
+  # close(matlab)
+  # rm(matlab)
+  warning('CrossValidateTensor is not working')
 }
