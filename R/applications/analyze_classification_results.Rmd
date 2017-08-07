@@ -1,0 +1,224 @@
+---
+title: "Analysis of Binary Classification Results Using Imputed Drug Signatures"
+author: "Rachel Hodos"
+date: '`r substr(date(), 5, 10)`, 2017'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_knit$set(root.dir = '../../')
+```
+
+```{r setup2, echo=FALSE, message=FALSE, warning=FALSE}
+
+library(ggplot2)
+library(reshape2)
+library(plyr)
+library(RColorBrewer)
+library(ggpubr)
+
+options(error=recover)
+library(RSQLite)
+source('R/src/DataProc.R')
+source('R/src/Utils.R')
+
+SplitOutcome = function(df){
+  df$category = sapply(as.character(df$outcome), function(x) unlist(strsplit(x, split='[.]'))[[1]])
+  df$outcome = sapply(as.character(df$outcome), function(x) unlist(strsplit(x, split='[.]'))[[2]])
+  return(df)
+}
+
+FilterByAUC = function(df, threshold=0.5){
+  return(subset(df, AUC.full > threshold | AUC.obs > threshold))
+}
+```
+
+Load the results
+```{r load_data}
+load('../results/classification/2017-07-30-03-47-00/results_ROC_counts_params.RData')
+```
+
+Do some processing...
+```{r process_Rmeas}
+
+# Melt AUC results
+R = melt(ROC)
+names(R) = c('AUC', 'eval', 'model', 'subset', 'feature', 'outcome')
+
+# Split outcome into outcome and category
+R = SplitOutcome(R)
+
+# Subset to top three represented ATCs
+R = subset(R, outcome %in% c('L','C','D') | category == 'Target')
+
+# Subset to evaluations on measured signatures and reformat data
+Rmeas = RemoveDfColumns(subset(R, eval == 'eval_meas'), 'eval')
+Rmeas$AUC[is.na(Rmeas$AUC)] = 0.5
+Rmeas = dcast(Rmeas, model + feature + outcome + category ~ subset, value.var='AUC')
+Rmeas = suppressWarnings(ChangeColumnName(Rmeas, from=c('full','obs'), to=c('AUC.full', 'AUC.obs')))
+Rmeas$diff = Rmeas$AUC.full - Rmeas$AUC.obs
+idx = Rmeas$category == 'ATC'
+Rmeas$outcome[idx] = paste0('ATC ' , Rmeas$outcome[idx])
+
+# Results where AUCs were both below this in the two comparisons are thrown out
+threshold = 0.5 
+Rmeas = FilterByAUC(Rmeas, threshold)
+```
+
+#### Analysis of overall results
+Look at the overall difference between the two groups:
+```{r overall_stats}
+t.test(x=Rmeas$AUC.full, y=Rmeas$AUC.obs, paired=TRUE)
+```
+
+Then count the number of cases where there is a positive change in AUC:
+```{r overall_counts}
+nPos = length(which(Rmeas$diff > 0)) 
+nTot = nrow(Rmeas)
+print(sprintf('%d out of %d increased AUC', nPos, nTot))
+```
+
+#### Analysis of results per model
+Plot distributions.
+```{r deltas_per_model}
+print(ggplot(Rmeas, aes(x=model, y=diff, group=model, fill=model)) + geom_boxplot() + ggtitle('Improvement in AUC per model') + stat_compare_means())
+```
+
+Check significance of deltas per model.
+```{r significance_per_model}
+print(lapply(split(Rmeas, Rmeas$model), function(x) t.test(x$AUC.full, x$AUC.obs, paired=TRUE)))
+```
+
+#### Analysis of results per signature type
+```{r plot_deltas_per_sig}
+numSigs = c(MCF7=1505, VCAP=1368, PC3=1340, A375=1168, A549=1139,
+            HA1E=1127, HT29=1022, HCC515=934, HEPG2=798, NPC=441)
+Rmeas$num_sigs = numSigs[Rmeas$feature]
+
+ggplot(Rmeas, aes(x=reorder(feature, -diff, FUN=median), y=diff, group=feature, fill=num_sigs)) +  geom_hline(yintercept = 0, color='grey', lwd=1) +
+  geom_boxplot(alpha=0.9) +
+  ggtitle(sprintf('Deltas per feature, threshold = %0.1f', threshold)) +
+  theme_bw() + ylim(c(-0.5,0.5)) + scale_fill_gradientn(colours=brewer.pal(5,'YlOrRd')) +
+  theme(text = element_text(size=18), axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size=20, hjust=0.5),
+        legend.justification='bottom', legend.position='bottom') +
+  labs(fill='# Signatures  \n  Measured\n', x='', y=expression(AUC [impute] - AUC [orig]),
+       title='Improvement in AUC per Drug Signature Type')
+# ggsave(PlotDir('DeltaAUC_per_Feature.svg'), height=7, width=8)
+```
+```{r signature_stats}
+p_feature = sapply(split(Rmeas, Rmeas$feature), function(x) t.test(x$AUC.full, x$AUC.obs, paired=TRUE)$p.value)
+print(adjp_feature <- sort(p.adjust(p_feature, method='BH')))
+```
+
+```{r plot_deltas_per_outcome}
+ggplot(Rmeas, aes(x=reorder(outcome, -diff, FUN=median), y=diff, group=outcome, fill=category)) + ylim(c(-0.5,0.5)) +
+  geom_hline(yintercept = 0, color='grey', lwd=1) + geom_boxplot(alpha=0.8) + scale_fill_manual(values=c('#CC9966','#009999')) +
+  ggtitle(sprintf('Deltas per outcome, threshold = %0.1f', threshold)) + theme_bw() +
+  labs(x='', y=expression(AUC [impute] - AUC [orig]), title='Improvement in AUC per Prediction Task',
+       fill='Category') +
+  theme(text = element_text(size=18), axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size=20, hjust=0.5),
+        legend.justification='bottom', legend.position='bottom')
+# ggsave(PlotDir('DeltaAUC_per_Outcome.svg'), height=7, width=8)
+```
+
+```{r outcome_stats}
+p_outcome = lapply(split(Rmeas, Rmeas$outcome), function(x) t.test(x$AUC.full, x$AUC.obs, paired=TRUE)$p.value)
+print(adjp_outcome <- sort(p.adjust(p_outcome, method='BH')))
+
+ddply(Rmeas, 'outcome', summarise, median.diff= median(diff))
+```
+
+```{r process_q2_data}
+load('../results/classification/2017-07-30-03-47-00/new_ROC_and_counts_with_correct_AUC_imp_values.RData')
+
+Outcome2Category = function(outcome){
+  return(sapply(as.character(outcome), function(x) unlist(strsplit(x, split='[.]'))[[1]]))
+}
+
+# Reformat results
+R = melt(ROC)
+R = dcast(R, L1 + L2 + L3 + L4 ~ L5)
+names(R) = c('outcome','feature','subset','model', 'AUC_imp', 'AUC_meas')
+R$category = Outcome2Category(R$outcome)
+R$outcome = sapply(R$outcome, function(x) unlist(strsplit(x, split='[.]'))[[2]])
+
+# Merge R with counts
+C = melt(counts)[,-3]
+names(C) = c('count','variable','feature','outcome')
+C = dcast(C, feature + outcome  ~ variable, value.var='count')
+C$outcome = sapply(C$outcome, function(x) unlist(strsplit(x, split='[.]'))[[2]])
+RC = merge(R, C, all=TRUE, by=c('outcome','feature'))
+RC = subset(RC, category=='Target' | outcome %in% c('L','C','D')) 
+print(sprintf('Starting with %d experiments', nrow(RC)))
+
+# Filter by two different thresholds to avoid 'non-signal' cases
+RC = subset(RC, AUC_imp > 0.5 | AUC_meas > 0.5 )
+print(sprintf('After filtering by AUC > 0.5, %d experiments remaining', nrow(RC)))
+
+RC = subset(RC, nPos_imp >= 3 & nPos_meas >= 3)
+print(sprintf('After filtering by num labels >= 3, %d experiments remaining', nrow(RC)))
+
+Targets = subset(RC, category == 'Target')
+ATC = subset(RC, category == 'ATC')
+#save(RC, ATC, Targets, file=ResultsDir('classification/2017-07-30-03-47-00/RC_all_models.RData'))
+```
+
+Run stats for ATC code prediction:
+```{r ATC_stats}
+t.test(ATC$AUC_imp, ATC$AUC_meas, paired=TRUE)
+```
+
+Run similar stats for target prediction:
+```{r target_stats}
+t.test(Targets$AUC_imp, Targets$AUC_meas, paired=TRUE)
+```
+
+```{r}
+H = subset(Targets, feature == 'HT29')
+print(sprintf('mean improvement by HT29 imputed signatures: %0.2f', mean(H$AUC_imp - H$AUC_meas)))
+```
+
+
+Compute median value across three models to simplify plots:
+```{r median_per_model}
+print(sprintf('Size of RC before: %d', nrow(RC)))
+RC = ddply(RC, c('outcome','feature','category','subset'),
+          summarize, AUC_imp=median(AUC_imp), AUC_meas=median(AUC_meas))
+print(sprintf('Size of RC after: %d', nrow(RC)))
+Targets = subset(RC, category == 'Target')
+ATC = subset(RC, category == 'ATC')
+print(sprintf('Size of ATC and Targets: %d, %d', nrow(ATC), nrow(Targets)))
+```
+
+Make ATC scatter (Figure 5D):
+```{r ATC_scatter}
+ggplot(ATC, aes(x=AUC_meas, y=AUC_imp, color=outcome, label=feature)) + 
+  geom_abline(slope=1, intercept=0, color='DarkGrey', lty='dashed') + geom_point(size=7, alpha=0.6) +
+  xlim(c(0,1)) + ylim(c(0,1)) +
+  geom_text(size=3, color='black', check_overlap=TRUE) + theme_bw() + 
+  guides(color=guide_legend(title='ATC Code', nrow =1)) + 
+  xlab('AUC on measured signatures') + ylab('AUC on predicted signatures') + 
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=18),
+        legend.text=element_text(size=10), legend.title=element_text(size=10),
+        legend.position='bottom', legend.justification='bottom')
+ggsave(PlotDir('ATC_code_imputed_vs_measured.svg'), width=8, height=7)
+```
+
+Make Target scatter (Figure 5E):
+```{r Target_scatter}
+ggplot(Targets, aes(x=AUC_meas, y=AUC_imp, color=outcome, label=feature)) + 
+  geom_abline(slope=1, intercept=0, color='DarkGrey', lty='dashed') + geom_point(size=7, alpha=0.6) +
+  xlim(c(0,1)) + ylim(c(0,1)) +
+  geom_text(size=3, color='black', check_overlap=TRUE) + theme_bw() + guides(color=guide_legend(title='Target', nrow=1)) +
+  xlab('AUC on measured signatures') + ylab('AUC on predicted signatures') + 
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=18),
+        legend.text=element_text(size=10), legend.title=element_text(size=10),
+        legend.position='bottom', legend.justification='bottom')
+ggsave(PlotDir('Target_imputed_vs_measured.svg'), width=8, height=7)
+```
+

@@ -94,29 +94,8 @@
 # #RC$positive_ratio = RC$nPos_imp / RC$nPos
 # 
 # RC = subset(RC, nPos_imp >= 3 & nPos_meas >= 3)
-load(ResultsDir('classification/2017-07-30-03-47-00/RC.RData'))
+# save(RC, file=ResultsDir('classification/2017-07-30-03-47-00/RC.RData'))
 
-RC$diff = RC$AUC_imp - RC$AUC_meas
-ATC = subset(RC, category=='ATC' & outcome %in% c('L','C','D'))
 
-ggplot(ATC, aes(x=AUC_meas, y=AUC_imp, color=outcome, label=feature)) + 
-  geom_abline(slope=1, intercept=0, color='DarkGrey', lty='dashed') + geom_point(size=9, alpha=0.6) +
-  xlim(c(0,1)) + ylim(c(0,1)) +
-  geom_text(size=3, color='black', check_overlap=TRUE) + theme_bw() + 
-  guides(color=guide_legend(title='ATC Code')) +
-  xlab('AUC on measured signatures') + ylab('AUC on predicted signatures') + 
-  theme(axis.text=element_text(size=12), axis.title=element_text(size=18),
-        legend.text=element_text(size=12), legend.title=element_text(size=14))
-ggsave(PlotDir('ATC_code_imputed_vs_measured.svg'), width=8, height=7)
-
-Targets = subset(RC, category == 'Target')
-ggplot(Targets, aes(x=AUC_meas, y=AUC_imp, color=outcome, label=feature)) + 
-  geom_abline(slope=1, intercept=0, color='DarkGrey', lty='dashed') + geom_point(size=9, alpha=0.6) +
-  xlim(c(0,1)) + ylim(c(0,1)) +
-  geom_text(size=3, color='black', check_overlap=TRUE) + theme_bw() + guides(color=guide_legend(title='Target')) +
-  xlab('AUC on measured signatures') + ylab('AUC on predicted signatures') + 
-  theme(axis.text=element_text(size=12), axis.title=element_text(size=18),
-        legend.text=element_text(size=12), legend.title=element_text(size=14))
-ggsave(PlotDir('Target_imputed_vs_measured.svg'), width=8.5, height=7)
 
 

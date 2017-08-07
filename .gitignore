@@ -1,3 +1,9 @@
 config.txt
 *.RData
 *.mat
+*.tif
+*.html
+*.png
+*.ai
+*.docx
+PSB-Impute/*
