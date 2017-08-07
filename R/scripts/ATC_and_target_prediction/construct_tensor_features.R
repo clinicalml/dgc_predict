@@ -1,9 +1,5 @@
 
 library(rhdf5)
-# This differs from the previous version in that going back to 10 cell lines
-# (there wasn't enough labeled data with measured signatures for the add'l cell
-# lines) but retaining the reduced-dimension version of that concatenated
-# features ('TensorPCA features')
 
 tsize = 'large'
 
@@ -11,31 +7,19 @@ tsize = 'large'
 tensors = list(meas=LoadTensorMat(DataDir(sprintf('tensors/%s.mat', tsize)))$tensor)
 names(dimnames(tensors$meas)) = c('drug','gene','cell')
 
-### Load completed tensors
-comp = list()
-for(method in c('dnpp', 'tensor')){
-  print(method)
-  tcomp = h5read(ResultsDir(sprintf('%s/hdf5/%s_final_hdf5.mat', tsize, method)),'T')
-  dimnames(tcomp) = dimnames(tensors$meas)
-  comp[[method]] = NormSigs(tcomp)
-}
+### Load completed tensor
+tensors$comp = h5read(ResultsDir(sprintf('%s/hdf5/dnpp_final_hdf5.mat', tsize)),'T')
+dimnames(tensors$comp) = dimnames(tensors$meas)
 
-### Load cross-validated tensors
+### Load cross-validated tensor
 file = ResultsDir(sprintf('%s/%s_tensor_results.mat', tsize, tsize))
-tcv = list(dnpp=h5read(file,'#refs#/d'), tensor=h5read(file,'#refs#/e'))
-tcv = lapply(tcv, function(tensor){dimnames(tensor) = dimnames(tensors$meas); return(tensor)})
+tensors$cv = h5read(file,'#refs#/d')
+dimnames(tensors$cv) = dimnames(tensors$meas)
 
-### Compute ensemble mean
-tensors$comp = 0.5*(comp$dnpp + comp$tensor)
-tensors$cv = 0.5*(tcv$dnpp + tcv$tensor)
-
-### Map entrez ids to gene symbols because who likes to look at numeric id's all day long
+### Map entrez ids to gene symbols 
 dimnames(tensors$meas)[[2]] = MapEntrezToSymbol(dimnames(tensors$meas)[[2]], lm=TRUE)
 dimnames(tensors$comp)[[2]] = MapEntrezToSymbol(dimnames(tensors$comp)[[2]], lm=TRUE)
 dimnames(tensors$cv)[[2]] = MapEntrezToSymbol(dimnames(tensors$cv)[[2]], lm=TRUE)
-
-### Look at number of signatures available per cell type
-# barplot(NumSigs(tensors$meas, 'cell'))
 
 ### Also subset to top ten measured cell types
 nCells = 10
@@ -69,8 +53,8 @@ L$allcell$full = UnfoldTensor(tensors$comp, dim=1)
 out = prcomp(L$allcell$full, retx=TRUE, center=TRUE, scale.=FALSE)
 cs = cumsum(out$sdev^2/sum(out$sdev^2))
 plot(cs)
-L$pca200$full = out$x[,1:200] # The first 200 accounts for 67.55% of the variance
-L$pca978$full = out$x[,1:978] # The first 978 accounts for 94.26% of the variance
+L$pca200$full = out$x[,1:200] # The first 200 accounts for 64.0% of the variance
+L$pca978$full = out$x[,1:978] # The first 978 accounts for 90.7% of the variance
 
 # Cell-specific
 for(cell in dimnames(tensors$meas)[[3]]){
@@ -108,4 +92,4 @@ cor(L$VCAP$obs[,2], L$VCAP$cv[,2], use = 'pairwise') #matched gene
 cor(L$VCAP$obs[,100], L$VCAP$cv[,3], use = 'pairwise') #un-matched gene
 
 ### Write to file
-save(L, file=DataDir(sprintf('expr/drug/tensor_features_for_drug_property_prediction_%dcells.RData', nCells)))
+save(L, file=DataDir(sprintf('expr/drug/tensor_features_for_drug_property_prediction_%dcells_knn.RData', nCells)))

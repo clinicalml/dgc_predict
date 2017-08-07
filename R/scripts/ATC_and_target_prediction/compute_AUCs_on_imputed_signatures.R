@@ -1,6 +1,5 @@
 
 load('../results/classification/2017-07-30-03-47-00/results_ROC_counts_params.RData')
-#save(ROC, counts, params, file='../results/classification/2017-07-30-03-47-00/results_ROC_counts_params.RData')
 R_old = melt(ROC)
 C_old = melt(counts)
 
@@ -70,7 +69,6 @@ C_new = melt(counts)
 C_old = subset(C_old, L3 == 'full')
 stopifnot(compare(C_old, C_new, allowAll = TRUE)$result)
 
-# Make scatter plots
 
 Outcome2Category = function(outcome){
   return(sapply(as.character(outcome), function(x) unlist(strsplit(x, split='[.]'))[[1]]))
@@ -91,13 +89,12 @@ names(C) = c('count','variable','feature','outcome')
 C = dcast(C, feature + outcome  ~ variable, value.var='count')
 C$outcome = sapply(C$outcome, function(x) unlist(strsplit(x, split='[.]'))[[2]])
 RC = merge(R, C, all=TRUE, by=c('outcome','feature'))
-#RC$positive_ratio = RC$nPos_imp / RC$nPos
 
 RC = subset(RC, nPos_imp >= 3 & nPos_meas >= 3)
 # Just keep top three most-represented codes in tensor. There are just not enough examples below this.
 ATC = subset(RC, category=='ATC' & outcome %in% c('L','C','D')) 
 Targets = subset(RC, category == 'Target')
 
-#save(RC, ATC, Targets, file=ResultsDir('classification/2017-07-30-03-47-00/RC.RData'))
+save(RC, ATC, Targets, file=ResultsDir('classification/2017-07-30-03-47-00/RC.RData'))
 
 

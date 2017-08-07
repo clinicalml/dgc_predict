@@ -3,7 +3,7 @@ sigs = LoadCDSigs()
 info = LoadCDInfo()
 
 # Construct large tensor
-out_old = ConstructTensor(sigs=sigs, info=info, pThresh=0.1, specificDose=FALSE, time='all',
+old = ConstructTensor(sigs=sigs, info=info, pThresh=0.1, specificDose=FALSE, time='all',
                       print=TRUE, nPerDrug=3, nPerCell=3, removeDuplicates=TRUE)
 
 # define 4 tensors
