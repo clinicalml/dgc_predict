@@ -57,11 +57,11 @@ MapEntrez2Uniprot = function(){
 MapEntrez2Hugo = function(entrez_ids){
   if(!all(is.na(entrez_ids))){
     load(DataDir('metadata/hgnc_to_entrez.RData'))
-    names(gene_annot) = c('hugo_id', 'entrez_id')
-    idx_remove = which(gene_annot$hugo_id == '')
-    gene_annot = gene_annot[-idx_remove,]
-    idx = match(entrez_ids, gene_annot$entrez_id)
-    out = gene_annot$hugo_id[idx]
+    names(map) = c('hugo_id', 'entrez_id')
+    idx_remove = which(map$hugo_id == '')
+    map = map[-idx_remove,]
+    idx = match(entrez_ids, map$entrez_id)
+    out = map$hugo_id[idx]
   }else{
     out = rep(NA, length(entrez_ids))
   }

@@ -70,6 +70,21 @@ TestMapEntrez2Hugo = function(){
   stopifnot(all(MapEntrez2Hugo(list(100302217,23559)) == c('MIR1827', 'WBP1')))
 }
 
+TestMapEntrezToSymbol = function(){
+  symbols = GetLmGenes(type = 'symbol')
+  entrez = GetLmGenes(type = 'entrez')
+  idx = sample(length(symbols))
+  
+  out = MapEntrezToSymbol(entrez[idx], lm=TRUE)
+  stopifnot(identical(out, symbols[idx]))
+  
+  out = MapEntrezToSymbol(c(entrez[1:2], 'foo'), lm=TRUE)
+  stopifnot(identical(out, c(symbols[1:2], NA)))
+  
+  out = MapEntrezToSymbol(c(entrez[1:2], 'foo'), lm=FALSE)
+  stopifnot(identical(out, c(symbols[1:2], NA)))
+}
+
 TestMapUniprot2Entrez = function(){
   proteins = c('F5GWI4','A0AAB7', 'B6EC88')
   entrez = MapUniprot2Entrez(proteins, printFlag=FALSE)

@@ -1,7 +1,14 @@
 
 #### directory and file handling ###################################################################
 
-TestPlotDir =function(){
+TestMakeDir = function(){
+  MakeDir('foo/bar')
+  unlink('foo', recursive=TRUE)
+  stopifnot(!dir.exists('foo'))
+}
+
+
+TestPlotDir = function(){
   file1 = PlotDir('test')
   file2 = PlotDir('test', subdir='subdir')
   stopifnot(file.exists(dirname(file1)))
@@ -276,6 +283,11 @@ TestEval = function(){
   stopifnot(Eval('2+2') == 4)
 }
 
+TestAlphaNames = function(){
+  nm = AlphaNames(5)
+  stopifnot(nm[1] == 'a.A')
+  stopifnot(nm[5] == 'e.A')
+}
 
 TestStr2Vec = function(){
   str1 = 'a,b,foo,bar,a'

@@ -19,7 +19,8 @@ All of the actual predictions are computed in MATLAB, and then all of the analys
 Note that the tensor is assumed to have dimensions of drugs x genes x cell types, where the gene dimension is either completely observed or completely missing for each drug/cell combination.
 
 ** WHERE TO START **
-In R/scripts, see: 
+In R, change you working directory to this one, then run >> source('R/src/init.R').
+Then in R/scripts, see: 
 example_complete_tensor_and_cv.R
 define_data_tensors.R for the code that compiles the Characteristic Direction drug signatures and subsets into the four tensors referred to in the paper.
 regenerate_all_figures_from_paper.R, which as you can probably guess, generates all the figures from the paper. This reruns some of the computations, but a lot of it has been precomputed, in order to avoid extensive compute time.

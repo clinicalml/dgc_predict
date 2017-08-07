@@ -7,3 +7,4 @@ config.txt
 *.ai
 *.docx
 PSB-Impute/*
+R/old

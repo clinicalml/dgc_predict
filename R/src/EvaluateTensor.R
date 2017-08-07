@@ -1,6 +1,6 @@
-ComputeGCP = function(T_meas, T_pred_list, plot=FALSE, subset='cv', file=NA){
-  G_meas = ComputeGeneGeneCor(T_meas, cellSpecific=TRUE)
-  G_pred_list = lapply(T_pred_list, function(tensor) ComputeGeneGeneCor(tensor, cellSpecific=TRUE))
+ComputeGCP = function(T_meas, T_pred_list, plot=FALSE, subset='cv', file=NA, print=TRUE){
+  G_meas = ComputeGeneGeneCor(T_meas, cellSpecific=TRUE, print=print)
+  G_pred_list = lapply(T_pred_list, function(tensor) ComputeGeneGeneCor(tensor, cellSpecific=TRUE, print=print))
   GCP = lapply(G_pred_list, function(G) CorMatrixList(G_meas, G))
   
   if(!is.na(file)){
@@ -15,29 +15,9 @@ ComputeGCP = function(T_meas, T_pred_list, plot=FALSE, subset='cv', file=NA){
   return(GCP)
 }
 
-ComputeCSpPres = function(T_meas, T_pred_list, plot=FALSE, subset='cv', cs_true=NULL, debug=FALSE){
-  
-  if(is.null(cs_true)){
-    cs_true = ComputeCellSpecificity(T_meas)$cs
-  }
-  
-  if(debug){
-    n=30
-    cs_true = cs_true[1:n]
-    T_pred_list = lapply(T_pred_list, function(tensor) tensor[1:n,,])
-  }
-  
-  cs_pred = lapply(T_pred_list, function(tensor) ComputeCellSpecificity(tensor)$cs)
-
-  if(plot){
-    p = PlotCSP(cs_true, cs_pred, subset=subset)
-  }else{
-    p = NULL
-  }
-  
-  CSp_cor = lapply(cs_pred, function(cs) cor(cs_true, cs, use='pairwise'))
-  CSp_slope = lapply(cs_pred, function(cs){fit = lm(cs ~ 0 + cs_true); fit$coefficients})
-  return(list(CSp_cor=CSp_cor, CSp_slope=CSp_slope, cs_pred, p=p))
+ComputePCT = function(T_meas, T_pred){
+  list[x_meas, x_pred] = Tensor2Vec(T_meas, T_pred)
+  return(cor(x_meas, x_pred))
 }
 
 ComputePCT_AllModes = function(T_meas, T_pred_list){
@@ -64,11 +44,6 @@ ComputePCT_AllModes = function(T_meas, T_pred_list){
   }
    
   return(list(PCTd=PCTd, PCTg=PCTg, PCTc=PCTc))
-}
-
-ComputePCT = function(T_meas, T_pred){
-  list[x_meas, x_pred] = Tensor2Vec(T_meas, T_pred)
-  return(cor(x_meas, x_pred))
 }
 
 ComputePCTPerSig = function(T1, T2, format='df'){
@@ -102,15 +77,6 @@ ComputePCTPerSig = function(T1, T2, format='df'){
   return(out)
 }
 
-ComputeErrorRate = function(T_meas, T_pred){
-  list[x_meas, x_pred] = Tensor2Vec(T_meas, T_pred)
-  return(Norm2(x_meas-x_pred)^2 / Norm2(x_meas)^2)
-}
-
-ComputeSqrtErrRate = function(T_meas, T_pred){
-  list[x_meas, x_pred] = Tensor2Vec(T_meas, T_pred)
-  return(Norm2(x_meas - x_pred) / Norm2(x_meas))
-}
 
 Tensor2Vec = function(T1, T2){
   x1 = as.vector(T1)
@@ -126,5 +92,30 @@ Tensor2Vec = function(T1, T2){
   }
   
   return(list(x1=x1, x2=x2))
+}
+
+ComputeCSpPres = function(T_meas, T_pred_list, plot=FALSE, subset='cv', cs_true=NULL, debug=FALSE){
+  
+  if(is.null(cs_true)){
+    cs_true = ComputeCellSpecificity(T_meas)$cs
+  }
+  
+  if(debug){
+    n=30
+    cs_true = cs_true[1:n]
+    T_pred_list = lapply(T_pred_list, function(tensor) tensor[1:n,,])
+  }
+  
+  cs_pred = lapply(T_pred_list, function(tensor) ComputeCellSpecificity(tensor)$cs)
+  
+  if(plot){
+    p = PlotCSP(cs_true, cs_pred, subset=subset)
+  }else{
+    p = NULL
+  }
+  
+  CSp_cor = lapply(cs_pred, function(cs) cor(cs_true, cs, use='pairwise'))
+  CSp_slope = lapply(cs_pred, function(cs){fit = lm(cs ~ 0 + cs_true); fit$coefficients})
+  return(list(CSp_cor=CSp_cor, CSp_slope=CSp_slope, cs_pred, p=p))
 }
 

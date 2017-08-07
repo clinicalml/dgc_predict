@@ -16,18 +16,11 @@ library(org.Hs.eg.db)
 library(plotrix)
 library(plyr)
 library(RColorBrewer)
-library(reshape)
 library(reshape2)
 library(ROCR)
 library(R.matlab)
 library(R.utils)
 library(WriteXLS)
-
-# These are from GSEA.R. Not sure which ones I need.
-# library(cellHTS2)
-# library(VennDiagram)
-# library(RCurl)
-# library(snow)
 
 merge = base::merge
 options(error=recover)
@@ -62,9 +55,6 @@ source('R/test/test_CallMatlab.R')
 
 source('R/src/GSEA.R')
 source('R/test/test_GSEA.R')
-
-source('R/src/Ensemble.R')
-#source('R/test/test_Ensemble.R')
 
 source('R/src/Plot.R')
 

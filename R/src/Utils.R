@@ -3,7 +3,7 @@
 
 MakeDir = function(dir){
   if(!dir.exists(dir)){
-    dir.create(dir)
+    dir.create(dir, recursive=TRUE)
   }else{
     warning('directory already exists!')
   }
@@ -381,6 +381,11 @@ ReadXLS = function(filename, sheetname=NULL) {
 
 Eval = function(string){
   return(eval(parse(text=string)))
+}
+
+AlphaNames = function(n){
+  stopifnot(n <= 26^2)
+  return(as.character(levels(interaction(letters, LETTERS)))[1:n])
 }
 
 Str2Vec = function(strings, split=',', unique=FALSE){
