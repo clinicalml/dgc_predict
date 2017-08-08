@@ -4,7 +4,7 @@ if ~exist('str')
     str = '';
 end
 
-fid = fopen('config/config.txt', 'r');
+fid = fopen('config.txt', 'r');
 tline = fgets(fid);
 lineParsed = strread(tline,'%s','delimiter','=');
 

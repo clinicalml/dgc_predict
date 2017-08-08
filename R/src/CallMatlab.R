@@ -20,12 +20,14 @@ CompleteTensor = function(matlab, tensor, method){
   return(out)
 }
 
-CrossValidateTensor = function(matlab, tensor, methods=c('mean','mean2', 'knnd', 'fa_lrtc'), exp_name='test', nFolds=10, maxFolds=10, saveFile=FALSE){
+CrossValidateTensor = function(matlab, tensor, methods=c('mean','mean2', 'knnd', 'fa_lrtc'),
+                               exp_name='test', nFolds=10, maxFolds=10, saveFile=FALSE){
   setVariable(matlab, methods=methods, tensor=tensor, exp_name=exp_name, nFolds=nFolds, maxFolds=maxFolds)
-  evaluate(matlab, '[cvTensors, PCT, PCTf] = TensorCV4(methods, tensor, exp_name, nFolds, maxFolds);')
+  evaluate(matlab, '[cvTensors, PCT, PCTf] = TensorCV(methods, tensor, exp_name, nFolds, maxFolds);')
   out = getVariable(matlab, 'cvTensors')$cvTensors
   PCT = as.vector(getVariable(matlab, 'PCT')$PCT)
   PCTf = getVariable(matlab, 'PCTf')$PCTf
+  browser()
   n = length(methods)
   stopifnot(length(out) == n)
   if(n > 1){

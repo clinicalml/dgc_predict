@@ -102,12 +102,12 @@ ggplot(Rmeas, aes(x=reorder(feature, -diff, FUN=median), y=diff, group=feature, 
   geom_boxplot(alpha=0.9) +
   ggtitle(sprintf('Deltas per feature, threshold = %0.1f', threshold)) +
   theme_bw() + ylim(c(-0.5,0.5)) + scale_fill_gradientn(colours=brewer.pal(5,'YlOrRd')) +
-  theme(text = element_text(size=18), axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title = element_text(size=20, hjust=0.5),
+  theme(text = element_text(size=22), axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size=24, hjust=0.5),
         legend.justification='bottom', legend.position='bottom') +
   labs(fill='# Signatures  \n  Measured\n', x='', y=expression(AUC [impute] - AUC [orig]),
-       title='Improvement in AUC per Drug Signature Type')
-# ggsave(PlotDir('DeltaAUC_per_Feature.svg'), height=7, width=8)
+       title='Improvement in AUC per\n Drug Signature Type')
+ggsave(PlotDir('DeltaAUC_per_Feature.svg'), height=7.7, width=8)
 ```
 ```{r signature_stats}
 p_feature = sapply(split(Rmeas, Rmeas$feature), function(x) t.test(x$AUC.full, x$AUC.obs, paired=TRUE)$p.value)
@@ -118,12 +118,12 @@ print(adjp_feature <- sort(p.adjust(p_feature, method='BH')))
 ggplot(Rmeas, aes(x=reorder(outcome, -diff, FUN=median), y=diff, group=outcome, fill=category)) + ylim(c(-0.5,0.5)) +
   geom_hline(yintercept = 0, color='grey', lwd=1) + geom_boxplot(alpha=0.8) + scale_fill_manual(values=c('#CC9966','#009999')) +
   ggtitle(sprintf('Deltas per outcome, threshold = %0.1f', threshold)) + theme_bw() +
-  labs(x='', y=expression(AUC [impute] - AUC [orig]), title='Improvement in AUC per Prediction Task',
+  labs(x='', y=expression(AUC [impute] - AUC [orig]), title='Improvement in AUC per\n Prediction Task',
        fill='Category') +
-  theme(text = element_text(size=18), axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title = element_text(size=20, hjust=0.5),
+  theme(text = element_text(size=22), axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size=24, hjust=0.5),
         legend.justification='bottom', legend.position='bottom')
-# ggsave(PlotDir('DeltaAUC_per_Outcome.svg'), height=7, width=8)
+ggsave(PlotDir('DeltaAUC_per_Outcome.svg'), height=7, width=8)
 ```
 
 ```{r outcome_stats}
@@ -197,14 +197,16 @@ print(sprintf('Size of ATC and Targets: %d, %d', nrow(ATC), nrow(Targets)))
 
 Make ATC scatter (Figure 5D):
 ```{r ATC_scatter}
+ATC$outcome = revalue(ATC$outcome, c('C'='C: Cardiovascular', 'D'='D: Dermatological',
+                                     'L'='L: Antineoplastic/Immunomodulatory'))
 ggplot(ATC, aes(x=AUC_meas, y=AUC_imp, color=outcome, label=feature)) + 
   geom_abline(slope=1, intercept=0, color='DarkGrey', lty='dashed') + geom_point(size=7, alpha=0.6) +
   xlim(c(0,1)) + ylim(c(0,1)) +
-  geom_text(size=3, color='black', check_overlap=TRUE) + theme_bw() + 
-  guides(color=guide_legend(title='ATC Code', nrow =1)) + 
+  geom_text(size=5, color='black', check_overlap=TRUE) + theme_bw() + 
+  guides(color=guide_legend(title='ATC Code', nrow=3)) + 
   xlab('AUC on measured signatures') + ylab('AUC on predicted signatures') + 
-  theme(axis.text=element_text(size=12), axis.title=element_text(size=18),
-        legend.text=element_text(size=10), legend.title=element_text(size=10),
+  theme(axis.text=element_text(size=18), axis.title=element_text(size=22),
+        legend.text=element_text(size=18), legend.title=element_text(size=22),
         legend.position='bottom', legend.justification='bottom')
 ggsave(PlotDir('ATC_code_imputed_vs_measured.svg'), width=8, height=7)
 ```
@@ -214,10 +216,10 @@ Make Target scatter (Figure 5E):
 ggplot(Targets, aes(x=AUC_meas, y=AUC_imp, color=outcome, label=feature)) + 
   geom_abline(slope=1, intercept=0, color='DarkGrey', lty='dashed') + geom_point(size=7, alpha=0.6) +
   xlim(c(0,1)) + ylim(c(0,1)) +
-  geom_text(size=3, color='black', check_overlap=TRUE) + theme_bw() + guides(color=guide_legend(title='Target', nrow=1)) +
+  geom_text(size=5, color='black', check_overlap=TRUE) + theme_bw() + guides(color=guide_legend(title='Target', nrow=2)) +
   xlab('AUC on measured signatures') + ylab('AUC on predicted signatures') + 
-  theme(axis.text=element_text(size=12), axis.title=element_text(size=18),
-        legend.text=element_text(size=10), legend.title=element_text(size=10),
+    theme(axis.text=element_text(size=18), axis.title=element_text(size=22),
+        legend.text=element_text(size=18), legend.title=element_text(size=22),
         legend.position='bottom', legend.justification='bottom')
 ggsave(PlotDir('Target_imputed_vs_measured.svg'), width=8, height=7)
 ```

@@ -10,7 +10,7 @@ T = GetTensor('tsize/small/small');
 
 %$T = T(1:10,1:20,1:3);
 
-[T_imputed, PCT, PCTf, time, testIdx] = TensorCV4(model, T, 'benchmarking', nFolds, ...
+[T_imputed, PCT, PCTf, time, testIdx] = TensorCV(model, T, 'benchmarking', nFolds, ...
                                           maxFolds, saveFile, printFlag, debugFlag, normalize)
 
 save(DataDir(sprintf('results/tsize/small/benchmarking/%s_full_small_tensor.mat', model)), 'model', 'PCT','PCTf','time','testIdx');

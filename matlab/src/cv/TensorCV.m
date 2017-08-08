@@ -1,4 +1,4 @@
-function [T_imputed, PCT, PCTf, time, testIdx] = TensorCV4(models, T, ...
+function [T_imputed, PCT, PCTf, time, testIdx] = TensorCV(models, T, ...
     exp_name, nFolds, maxFolds, saveFile, printFlag, debugFlag, ...
     normalize, args_in, minSigsPerDrug)
 
@@ -31,7 +31,8 @@ function [T_imputed, PCT, PCTf, time, testIdx] = TensorCV4(models, T, ...
 % time          Runtime (seconds) per fold per model.
 % testIdx       See 'SplitTensor'.
 
-%% initialize, set defaults and load data
+
+%# initialize, set defaults and load data
 InitRand();
 
 if ischar(models)
@@ -159,6 +160,7 @@ if saveFile
     save([outDir exp_desc], 'T_imputed', 'PCTf', 'PCT', 'time',...
         'testIdx', 'nIter');
 end
+
 
 end
 
