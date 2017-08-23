@@ -4,12 +4,25 @@ function [T, out] = CompleteTensorKNNCell(T, args)
 %M = Unfold(T, size(T), 3)';
 %C = corr(M, 'rows', 'pairwise');
 
-% This way is faster and gives almost identical results
-C = nan(size(T,3),size(T,3),size(T,1)); 
+% % This way is faster and gives almost identical results
+% C = nan(size(T,3),size(T,3),size(T,1)); 
+% for d = 1:size(T,1)
+%     C(:,:,d) = corr(squeeze(T(d,:,:))); 
+% end
+% C = mean(C, 3, 'omitnan');
+% C_save = C;
+
+% This is faster and is also memory efficient
+C = zeros(size(T,3), size(T,3));
+nanCt = zeros(size(T,3), size(T,3));
 for d = 1:size(T,1)
-    C(:,:,d) = corr(squeeze(T(d,:,:))); 
+    newCors = corr(squeeze(T(d,:,:)));
+    tmp = cat(3,C,newCors);
+    C = nansum(tmp,3);
+    nanCt = nanCt + isnan(newCors);
 end
-C = mean(C, 3, 'omitnan');
+C = C ./ (size(T, 1) - nanCt);
+clear nanCt tmp newCors
 
 % set any negative correlations to 0 so that they don't contribute 
 if ~isempty(find(C(:) <= 0, 1))
