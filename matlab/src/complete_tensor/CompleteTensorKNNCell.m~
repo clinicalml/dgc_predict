@@ -1,11 +1,12 @@
 function [T, out] = CompleteTensorKNNCell(T, args)
 
 
-%%% Compute similarity
+% Compute similarity
 C = nan(size(T,3),size(T,3),size(T,1)); 
 for d = 1:size(T,1)
     C(:,:,d) = corr(squeeze(T(d,:,:))); 
 end
+
 if isfield(args, 'maxSim')
     fprintf('maxSim = %d\n', args.maxSim);
     C(isnan(C)) = -Inf;
@@ -16,19 +17,11 @@ else
     S = mean(C, 3, 'omitnan');
 end
 
-% % This is faster and is also memory efficient, but doesn't work for
-% knn_ts
-% C = zeros(size(T,3), size(T,3));
-% nanCt = zeros(size(T,3), size(T,3));
-% for d = 1:size(T,1)
-%     newCors = corr(squeeze(T(d,:,:)));
-%     tmp = cat(3,C,newCors);
-%     C = nansum(tmp,3);
-%     nanCt = nanCt + isnan(newCors);
-% end
-% S = C ./ (size(T, 1) - nanCt);
-% clear nanCt tmp newCors C
-
+for i = 1:300
+    for j = 1:300
+        cts(i,j) = length(find(~isnan(C(i,j,:))));
+    end
+end
 
 % set any negative correlations to 0 so that they don't contribute 
 if ~isempty(find(S(:) <= 0, 1))

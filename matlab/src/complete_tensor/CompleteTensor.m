@@ -43,7 +43,11 @@ else
             str = 'MatrixComp';
         case 'knnd'
             str = 'KNNDrug';
+        case 'knnd_ts';
+            str = 'KNNDrug';
         case 'knnc'
+            str = 'KNNCell';
+        case 'knnc_ts';
             str = 'KNNCell';
         case 'knndc'
             str = 'KNNDrugCell';

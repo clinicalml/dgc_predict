@@ -66,30 +66,30 @@ for m = 1:nModels
     clear T_pred
 end
 
-% -> First reload validation sets
-
 %%% Then compute the row mapping between the full test set and the two
 %%% subsets (dense and sparse)
 
 % first on the dense set
-n_dns = length(test_dns.drugIdx;
+n_dns = length(test_dns.drugIdx);
 dns_idx = nan(n_dns);
 for i = 1:n_dns
     idx1 = find(test.drugIdx == test_dns.drugIdx(i));
     idx2 = find(test.cellIdx == test_dns.cellIdx(i));
     idx = intersect(idx1, idx2);
     assert(length(idx) == 1);
+    assert(test_dns.data(i,:) == test.data(idx,:));
     dns_idx(i) = idx;
 end
 
 % and also on the sparse set
-n_sp = length(test_sp.drugIdx;
+n_sp = length(test_sp.drugIdx);
 sp_idx = nan(n_sp);
 for i = 1:n_sp
     idx1 = find(test.drugIdx == test_sp.drugIdx(i));
     idx2 = find(test.cellIdx == test_sp.cellIdx(i));
     idx = intersect(idx1, idx2);
     assert(length(idx) == 1);
+    assert(test_sp.data(i,:) == test.data(idx,:));
     sp_idx(i) = idx;
 end
 

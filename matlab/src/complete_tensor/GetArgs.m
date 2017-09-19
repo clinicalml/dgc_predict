@@ -35,8 +35,12 @@ switch(model)
         args = GetMatrixCompArgs();
     case 'knnd'
         args = GetKNNDrugArgs();
+    case 'knnd_ts'
+        args = GetKNNDrug_topSimArgs();
     case 'knnc'
         args = GetKNNCellArgs();
+    case 'knnc_ts'
+        args = GetKnnCell_topSimArgs();
     case 'knndc'
         args = GetKNNDrugCellArgs();
     case 'unfoldmc'
@@ -135,8 +139,19 @@ args.K = 10;
 % end
 end
 
+function args = GetKNNDrug_topSimArgs()
+args.K = 10;
+args.maxSim = 5;
+end
+
+
 function args = GetKNNCellArgs()
 args.K = 10;
+end
+
+function args = GetKNNCell_topSimArgs()
+args.K = 10;
+args.maxSim = 5;
 end
 
 function args = GetKNNDrugCellArgs()
