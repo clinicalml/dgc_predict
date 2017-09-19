@@ -203,9 +203,12 @@ JaccardIndex = function(binary_vec1, binary_vec2){
   idx1 = which(binary_vec1 == 1)
   idx2 = which(binary_vec2 == 1)
   
+  return(JaccardIndex_fromIdx(idx1,idx2))
+}
+
+JaccardIndex_fromIdx = function(idx1, idx2){
   A_intersect_B = length(intersect(idx1, idx2))
   A_union_B = length(union(idx1, idx2))
-  
   return(A_intersect_B / A_union_B)
 }
 
