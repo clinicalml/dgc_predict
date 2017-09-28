@@ -106,13 +106,6 @@ MapUniprot2Entrez = function(proteins, printFlag=TRUE, collapse=FALSE){
   return(as.character(p2e))
 }
 
-GetLincs2Pubchem = function(){
-  load(DataFile('metadata/lincsAnnot_inHouse_pertInfo_allCompounds.RData'))
-  lincsIdMap = lincsAnnot[,c('pert_id', 'pubchem_cid.pertInfo')]
-  names(lincsIdMap) = c('pert_id', 'pubchem_id')
-  return(lincsIdMap)
-}
-
 DataFile = function(file){
   return(paste0(GetConfig('DATAPATH'),'/',file))
 }

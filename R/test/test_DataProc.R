@@ -94,17 +94,8 @@ TestMapUniprot2Entrez = function(){
   stopifnot(proteins[c(1,3)] %in% unlist(mapBack[as.character(entrez)]))
 }
 
-TestGetLincs2Pubchem = function(){
-  map = GetLincs2Pubchem()
-  stopifnot(dim(map) == c(20452,2))
-  stopifnot(class(map$pert_id) == 'character')
-  stopifnot(class(map$pubchem_id) == 'character')
-  stopifnot(length(unique(map$pert_id)) > 1000)
-  stopifnot(length(unique(map$pubchem_id)) > 1000)
-}
-
 TestDataFile = function(){
-  file = DataFile('tensors/cmap.mat')
+  file = DataFile('tensors/T_test.RData')
   stopifnot(file.exists(file))
 }
 
