@@ -331,6 +331,7 @@ LoadTensors = function(tsize='small', print=FALSE, loadMergeAndPred=FALSE){
   tensors = list()
   
   if(print){print('Loading data tensor..')}
+  
   tensors$meas = LoadTensorMat(DataDir(sprintf('tensors/%s.mat', tsize)))$tensor
   names(dimnames(tensors$meas)) = c('drug','gene','cell')
   
@@ -340,43 +341,15 @@ LoadTensors = function(tsize='small', print=FALSE, loadMergeAndPred=FALSE){
   
   tensors$cv = list(mean=h5read(file, '#refs#/b'), mean2=h5read(file,'#refs#/c'),
                     dnpp=h5read(file,'#refs#/d'), tensor=h5read(file,'#refs#/e'))
-  tensors$cv = lapply(tensors$cv, function(tensor){dimnames(tensor) = dimnames(tensors$meas); return(tensor)})
   
-  if(loadMergeAndPred){
-    if(print){print('Loading completed tensors and then generating merged and predicted tensors...')}
-    for(method in c('mean', 'mean2','dnpp', 'tensor')){
-      if(print){print(method)}
-      
-      if(print){print('..completed tensor')}
-      
-      if(tsize == 'large'){
-        tcomp = h5read(ResultsDir(sprintf('large/hdf5/%s_final_hdf5.mat', method)),'T')
-      }else{
-        tcomp = LoadTensorMat(DataDir(sprintf('results/tsize/%s/%s_final.mat', tsize, method)))$tensor
-      }
-      
-      dimnames(tcomp) = dimnames(tensors$meas)
-      tcomp = NormSigs(tcomp)
-      
-      if(print){print('..merged tensor')}
-      mergeT = tensors$cv[[method]]
-      mergeT[is.na(mergeT)] = tcomp[is.na(mergeT)]
-      tensors$merge[[method]] = mergeT
-      
-      if(print){print('..predicted tensor')}
-      predT = tcomp
-      predT[!is.na(tensors$cv[[method]])] = NA
-      tensors$pred[[method]] = predT
-      stopifnot(NumSigs(tensors$pred[[method]]) + NumSigs(tensors$cv[[method]]) == NumSigs(tcomp))
-      
-      rm(predT, tcomp, mergeT)
-    }
-  }
+  tensors$cv = lapply(tensors$cv, function(tensor){
+    dimnames(tensor) = dimnames(tensors$meas); return(tensor)})
+  
   return(tensors)
 }
 
 GetGeneIdsTensor = function(){
-  load(DataDir('tensors/T50_1.RData'))
+  load(DataDir('tensors/test/T50_1.RData'))
   return(dimnames(T_meas)[[2]])
 }
 

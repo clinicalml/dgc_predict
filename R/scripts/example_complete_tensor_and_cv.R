@@ -6,10 +6,10 @@ input_size = 'medium' # small = 5 drugs x 4 genes x 8 cell types, medium = 50 x 
 
 # Load data
 if(input_size == 'small'){
-  load(DataDir('tensors/T_test.RData')) 
+  load(DataDir('tensors/test/T_test.RData')) 
   tensors = list(meas = T_test)
 }else if(input_size == 'medium'){
-  load(DataDir('tensors/T50_1.RData')) 
+  load(DataDir('tensors/test/T50_1.RData')) 
   tensors = list(meas = T_meas)
 }else{
   stop('input_size not recognized')

@@ -88,7 +88,7 @@ TestSummarizeMatrix = function(){
 
 
 TestCompareTensors = function(){
-  load(DataDir('tensors/T_test.RData'))
+  load(DataDir('tensors/test/T_test.RData'))
   T1 = T_test
   d = dim(T1)
   T2 = T1[sample(d[1]), sample(d[2]), sample(d[3])]
@@ -154,7 +154,7 @@ TestConstructTensor = function(){
 
 TestRestrictToCommonSigs = function(){
   # load three tensors where I know what the common support is
-  load(DataDir('tensors/T_test.RData'))
+  load(DataDir('tensors/test/T_test.RData'))
   T1 = T_test[,,1:5]
   T2 = T_test[1:3,2:4,]
   T3 = T_test[3:1,1:4,]
@@ -176,7 +176,7 @@ TestRestrictToCommonSigs = function(){
 }
 
 TestSubsetTensor = function(){
-  load(DataDir('tensors/T_test.RData'))
+  load(DataDir('tensors/test/T_test.RData'))
   Tsm = SubsetTensor(T_test, nDrugs=4, nCells=7)
   stopifnot(CompareTensors(Tsm, T_test[c('BRD-A84481105','BRD-A52660433','BRD-A47513740','BRD-K55127134'),,
                                        c('A375','A549','HA1E','HT29','MCF7','PC3','VCAP')]))

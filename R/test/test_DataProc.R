@@ -1,5 +1,5 @@
 TestSubsetTensorDims = function(){
-  load(DataDir('tensors/T_test.RData'))
+  load(DataDir('tensors/test/T_test.RData'))
   list[drugs, genes, cells] = dimnames(T_test)
   Tsm = T_test[drugs[3:4], genes[1:3], cells[1:4]]
   Tlg = T_test
@@ -9,7 +9,7 @@ TestSubsetTensorDims = function(){
 
 TestGetDrugSlice = function(){
   drug = 'BRD-A52660433'
-  load(DataDir('tensors/T_test.RData'))
+  load(DataDir('tensors/test/T_test.RData'))
   M = GetDrugSlice(tensor=T_test, drug=drug)
   stopifnot(NumSigs(T_test, 'drug')[drug] == ncol(M))
   stopifnot(dim(T_test)[[2]] == nrow(M))
@@ -32,7 +32,7 @@ TestNormSigs = function(){
 }
 
 TestComputeDensity = function(){
-  load(DataDir('tensors/T_test.RData'))
+  load(DataDir('tensors/test/T_test.RData'))
   d1 = length(which(!is.na(T_test))) / prod(dim(T_test))
   d2 = ComputeDensity(T_test)
   stopifnot(d1 == d2)
@@ -95,12 +95,12 @@ TestMapUniprot2Entrez = function(){
 }
 
 TestDataFile = function(){
-  file = DataFile('tensors/T_test.RData')
+  file = DataFile('tensors/test/T_test.RData')
   stopifnot(file.exists(file))
 }
 
 TestNumSigs = function(){
-  load(DataDir('tensors/T_small.RData'))
+  load(DataDir('tensors/test/T_small.RData'))
   n = NumSigs(T_small)
   stopifnot(n == 36)
   
@@ -140,7 +140,7 @@ TestGetTensorAnnot = function(){
 }
 
 TestUnfoldTensor = function(){
-  load(DataDir('tensors/T_small.RData'))
+  load(DataDir('tensors/test/T_small.RData'))
   X = T_small
   M1 = UnfoldTensor(X, 1)
   M2 = UnfoldTensor(X, 2)
@@ -161,7 +161,7 @@ TestUnfoldTensor = function(){
 }
 
 TestTensorZ = function(){
-  load(DataDir('tensors/T_small.RData'))
+  load(DataDir('tensors/test/T_small.RData'))
   X = T_small
   Z = TensorZ(X)$Z
   m = apply(Z, 2, function(x) mean(x, na.rm=TRUE))
@@ -178,7 +178,7 @@ TestTensorZ = function(){
 }
 
 TestTensorDEG = function(){
-  load(DataDir('tensors/T50_1.RData'))
+  load(DataDir('tensors/test/T50_1.RData'))
   X = T_meas
   eps = 1
     for(perc in c(10,20)){
@@ -244,7 +244,7 @@ TestComputeCellSpecificity = function(){
 }
 
 TestComputeGeneGeneCor = function(){
-  load(DataDir('tensors/T50_1.RData'))
+  load(DataDir('tensors/test/T50_1.RData'))
   X = T_meas
   G = ComputeGeneGeneCor(X, nGene=10, cellSpecific=FALSE)
   gList1 = list()
@@ -268,7 +268,7 @@ TestGetGeneGeneCor = function(){
 }
 
 TestRankSigs = function(){
-  load(DataDir('tensors/T50_1.RData'))
+  load(DataDir('tensors/test/T50_1.RData'))
   X = abs(T_meas[1:20,1:50,])
   cs = ComputeCellSpecificity(X)$cs
   R = RankSigs(X)
@@ -322,7 +322,7 @@ TestGetExpCount = function(){
 }
 
 TestCheckColumnStructure = function(){
-  load(DataDir('tensors/T_test.RData'))
+  load(DataDir('tensors/test/T_test.RData'))
   stopifnot(CheckColumnStructure(T_test))
   
   T2 = T_test
@@ -340,15 +340,14 @@ TestCheckColumnStructure = function(){
 TestLoadTensorMat = function(){}
 
 TestLoadTensors = function(){
-  warning('Need to TestLoadTensors()')
-  # tensors = LoadTensors(tsize='small', print=FALSE)
-  # stopifnot(names(tensors) == c('meas', 'cv'))
-  # stopifnot(dim(tensors$meas) == c(300, 978, 15))
-  # stopifnot(names(tensors$cv) == CompletionMethods(version='R', knn=FALSE))
-  # s = NumSigs(tensors$meas)
-  # tmp = lapply(tensors$cv, function(tensor) stopifnot(NumSigs(tensor) - s <= 10))
-  # stopifnot(CheckColumnStructure(tensors$meas))
-  # tmp = lapply(tensors$cv, function(tensor) stopifnot(CheckColumnStructure(tensor)))
+  tensors = LoadTensors(tsize='small', print=FALSE)
+  stopifnot(names(tensors) == c('meas', 'cv'))
+  stopifnot(dim(tensors$meas) == c(300, 978, 15))
+  stopifnot(names(tensors$cv) == CompletionMethods(version='R', knn=FALSE))
+  s = NumSigs(tensors$meas)
+  tmp = lapply(tensors$cv, function(tensor) stopifnot(NumSigs(tensor) - s <= 10))
+  stopifnot(CheckColumnStructure(tensors$meas))
+  tmp = lapply(tensors$cv, function(tensor) stopifnot(CheckColumnStructure(tensor)))
 }
 
 TestGetGeneIdsTensor = function(){
