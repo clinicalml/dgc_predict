@@ -92,4 +92,4 @@ cor(L$VCAP$obs[,2], L$VCAP$cv[,2], use = 'pairwise') #matched gene
 cor(L$VCAP$obs[,100], L$VCAP$cv[,3], use = 'pairwise') #un-matched gene
 
 ### Write to file
-save(L, file=DataDir(sprintf('expr/drug/tensor_features_for_drug_property_prediction_%dcells_knn.RData', nCells)))
+save(L, file=DataDir(sprintf('expr/tensor_features_for_drug_property_prediction_%dcells_knn.RData', nCells)))

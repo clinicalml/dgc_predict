@@ -209,7 +209,7 @@ CompareTensors = function(T1, T2){
 
 LoadCDSigs = function(data=get0('sigs'), debug=FALSE){
   
-  baseDir = DataDir('expr/drug/')
+  baseDir = DataDir('expr/')
 
   if(debug){
     dataFile = paste0(baseDir, 'drugSigs_smallSample.RData')

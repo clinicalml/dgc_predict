@@ -6,7 +6,7 @@ C_old = melt(counts)
 ### Load gene expression features. For now, remove concatenated features since
 ### it takes longer, and remove cv features
 print('loading data...')
-load(DataDir('expr/drug/tensor_features_for_drug_property_prediction_10cells_knn.RData'))
+load(DataDir('expr/tensor_features_for_drug_property_prediction_10cells_knn.RData'))
 L = L[setdiff(names(L), c('allcell','pca200','pca978'))]
 
 ### Load label matrices

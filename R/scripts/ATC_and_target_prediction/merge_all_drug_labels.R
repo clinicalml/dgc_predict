@@ -1,4 +1,4 @@
-load(DataDir('expr/drug/tensor_features_for_drug_property_prediction_10cells_knn.RData'))
+load(DataDir('expr/tensor_features_for_drug_property_prediction_10cells_knn.RData'))
 
 # targets
 TG = read.table(DataDir('targets/top_7_targets_in_large_tensor.csv'), sep=',', header=TRUE, row.names=1)
