@@ -9,3 +9,5 @@ config.txt
 PSB-Impute/*
 R/no_git
 matlab/no_git
+.Rhistory
+*.DS_Store
