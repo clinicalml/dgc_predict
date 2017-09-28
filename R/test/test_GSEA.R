@@ -5,7 +5,7 @@ TestRunGsea = function(){
   PW_KEGG = KeggGeneSets(species='Hs')
   ListGSC = list(GO_CC=GO_CC, PW_KEGG=PW_KEGG)
   
-  geneSet = intersect(union(GO_CC[[480]],PW_KEGG[[52]]), lmGenes)[-1]
+  geneSet = intersect(union(GO_CC[['GO:0016605']],PW_KEGG[['hsa05140']]), lmGenes)[-1]
   x = rnorm(978)
   names(x) = lmGenes
   

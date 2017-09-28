@@ -38,9 +38,9 @@ TestCompleteTensor= function(mat = get0('matlab')){
 
 TestCrossValidateTensor = function(mat = get0('matlab')){
   matlab = StartMatlab()
-  tensor = MakeTensor(nDrugs=50, nCells=10, nGenes=50, NA_frac=0, fill=5, removeSig_frac=0.2)
+  tensor = NormSigs(MakeTensor(nDrugs=50, nCells=10, nGenes=50, NA_frac=0, fill=5, removeSig_frac=0.2, noise=0.1))
   out = CrossValidateTensor(matlab, tensor, methods=c('mean'))
-  # close(matlab)
-  # rm(matlab)
-  warning('CrossValidateTensor is not working')
+  close(matlab)
+  rm(matlab)
+  stopifnot(abs(ComputePCT(out$tensors, tensor) - out$PCT) < 1e-5)
 }

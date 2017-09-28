@@ -87,7 +87,7 @@ TestComputeCSpPres = function(){}
 
 #### Helper functions ####
 
-MakeTensor = function(nDrugs=500, nGenes=10, nCells=2, NA_frac=0, fill=NA, removeSig_frac=0){
+MakeTensor = function(nDrugs=500, nGenes=10, nCells=2, NA_frac=0, fill=NA, noise=0, removeSig_frac=0){
   nEntries = nDrugs * nGenes * nCells
   
   nm = list(drugs=paste0('drug.', AlphaNames(nDrugs)),
@@ -99,7 +99,11 @@ MakeTensor = function(nDrugs=500, nGenes=10, nCells=2, NA_frac=0, fill=NA, remov
   }else{
     tensor = array(data=fill, dim=c(nDrugs,nGenes,nCells), dimnames=nm)
   }
-  
+
+  if(noise > 0){
+    tensor = tensor + array(data=rnorm(nEntries, mean=0, sd=noise), dim=c(nDrugs, nGenes, nCells), dimnames=nm)
+  }
+
   if(NA_frac > 0 && (removeSig_frac > 0|!is.na(fill))){
     stop('NA_frac is not compatible with other arguments')
   }

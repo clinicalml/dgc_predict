@@ -165,6 +165,16 @@ TestJaccardIndex = function(){
   stopifnot(JaccardIndex(A,D) == 0)
 }
 
+TestJaccardIndex_fromIdx = function(){
+  A = which(c(0,1,1,0)==1)
+  B = which(c(1,1,1,0)==1)
+  stopifnot(JaccardIndex_fromIdx(A,B) == 2/3)
+  C = which(c(0,1,1,0)==1)
+  stopifnot(JaccardIndex_fromIdx(A,C) == 1)
+  D = which(c(0,0,0,0)==1)
+  stopifnot(JaccardIndex_fromIdx(A,D) == 0)
+}
+
 TestZScore = function(){
   z = ZScore(rnorm(1000, mean=2, sd=0.1))
   m = mean(z)
