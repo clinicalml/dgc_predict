@@ -52,6 +52,7 @@ TestResultsDir = function(){
 #### workspace helper functions ####################################################################
 
 TestLsVars = function(){
+  # Not sure why this was giving me problems
   #i = 5
   #stopifnot('i' %in% LsVars())
 }
