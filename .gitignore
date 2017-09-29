@@ -14,3 +14,5 @@ R/no_git
 matlab/no_git
 .Rhistory
 *.DS_Store
+InputStreamByteWrapper.class
+MatlabServer.m
