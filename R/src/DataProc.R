@@ -337,7 +337,7 @@ LoadTensors = function(tsize='small', print=FALSE){
   
   if(print){print('Loading cross-validated tensors..')}
   
-  file = ResultsDir(sprintf('%s/%s_tensor_results.mat', tsize, tsize))
+  file = ResultsDir(sprintf('%s/%s_tensor_cv_results.mat', tsize, tsize))
   
   tensors$cv = list(mean=h5read(file, '#refs#/b'), mean2=h5read(file,'#refs#/c'),
                     dnpp=h5read(file,'#refs#/d'), tensor=h5read(file,'#refs#/e'))
