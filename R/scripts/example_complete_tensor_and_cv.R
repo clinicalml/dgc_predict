@@ -19,7 +19,7 @@ if(input_size == 'small'){
 matlab = StartMatlab()
 
 # Run cross-validation <- This isn't working for some reason
-#tensors$cv = CrossValidateTensor(matlab, tensor=tensors$meas, methods=method)$tensors
+tensors$cv = CrossValidateTensor(matlab, tensor=tensors$meas, methods=method)$tensors
 
 # Complete tensor
 tensors$pred = CompleteTensor(matlab, tensors$meas, method)

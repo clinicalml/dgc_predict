@@ -1,9 +1,6 @@
-setwd('~/Desktop/Research/LINCS/submission/dgc_predict')
-testAll = FALSE
-source('R/init.R')
 
-load('/Users/rhodos/Desktop/Research/LINCS/data/results/tsize/large/accuracy_per_mode.RData')
-load('/Users/rhodos/Desktop/Research/LINCS/data/expr/tensor/tsize/large/tensor_annot.RData')
+load(ResultsDir('large/entity_specific_accuracy.RData')) 
+load(DataDir('metadata/tensor_annot.RData'))
 
 # Compile drug-specific accuracy into a data frame
 acc = data.frame(pert_id = annot$pertIds, mean=C$mean$drug, mean2 = C$mean2$drug, 
@@ -26,7 +23,7 @@ n = nrow(E)
 TC = array(data=NA, dim=c(n,n))
 IDX = apply(E, 1, function(x) as.integer(which(x == 1)))
 for(i in 1:n){
-  print(i)
+  if(i %% 100 == 0){print(sprintf('i=%d', i))}
   for(j in IncreasingSequence(i+1, n)){
     TC[i,j] = JaccardIndex_fromIdx(IDX[[i]], IDX[[j]])
   }
@@ -52,10 +49,13 @@ maxTC[perts]
 # -> So the good results seen for these compounds cannot simply be explained by having a strong cognate in the dataset.
 
 ### Now let's compute overall PCT on subsets restricted by maxTC thresholds
-tensors = LoadTensors(tsize='large', print=TRUE, loadMergeAndPred = FALSE)
+if(~exists('tensors')){
+  tensors = LoadTensors(tsize='large', print=TRUE)
+}
+
 stopifnot(identical(dimnames(tensors$meas)[[1]], annot$pertIds))
 pct = lapply(seq(0.05, 1.0, 0.05), function(thresh){ print(thresh); lapply(tensors$cv, function(tensor) 
-  ComputePCT(tensors$meas[names(which(maxTC < thresh)),,], tensor[names(which(maxTC <= thresh)),,]))})
+  ComputePCT(tensors$meas[names(which(maxTC <= thresh)),,], tensor[names(which(maxTC <= thresh)),,]))})
 
 names(pct) = as.character(seq(0.05, 1.0, 0.05))
 mp = melt(pct)
@@ -66,6 +66,3 @@ ggplot(subset(mp, threshold>=0.3), aes(x=threshold, y=PCT, group=method, color=m
   geom_line(size=1.4) + theme_bw() + labs(x='maxTC threshold') + theme(text=element_text(size=18)) +
   scale_color_manual(values=unlist(GetMethodColors(longName=TRUE)))
 ggsave(PlotDir('chem_structure_bias.pdf'), width=6.5, height=4)
-
-
-

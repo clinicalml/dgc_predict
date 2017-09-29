@@ -13,16 +13,6 @@ for(model in c('asmatrix', 'constrained', 'si_lrtc', 'ha_lrtc', 'fa_lrtc','tmac'
 results = melt(results_list)[,3:5]
 names(results) = c('value', 'type', 'model')
 
-# # the five algorithms besides Tmac look very similar.  First let's test the null hypothesis that they are all the same:
-# res = subset(results, type=='abs_err')
-# out = aov(value ~ model, data=res)
-
-# # # test significance of each algorithm's performance with the best performing one
-# # r = split(subset(results, type=='abs_err'), f=res$model)
-# # pvals_subset = sapply(models, function(x) t.test(r$asmatrix$value, r[[x]]$value)$p.value)
-# # #    asmatrix  constrained      fa_lrtc      ha_lrtc      si_lrtc         tmac 
-# # #1.000000e+00 5.053928e-05 4.106626e-02 2.411464e-04 2.527076e-03 7.154553e-92 
-
 results$model = revalue(as.factor(results$model), c('mean'='1D-Mean', 'mean2'='2D-Mean', 'knnd'='DNPP',
                                                     'fa_lrtc'='FaLRTC','si_lrtc'='SiLRTC','ha_lrtc'='HaLRTC',
                                                     'asmatrix'='AsMatrix','constrained'='Constrained','tmac'='Tmac'))

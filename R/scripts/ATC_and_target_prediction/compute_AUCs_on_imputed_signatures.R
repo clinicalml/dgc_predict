@@ -1,5 +1,5 @@
 
-load('../results/classification/2017-07-30-03-47-00/results_ROC_counts_params.RData')
+load(ResultsDir('ATC_and_target_prediction/results_ROC_counts_params.RData'))
 R_old = melt(ROC)
 C_old = melt(counts)
 
@@ -95,6 +95,6 @@ RC = subset(RC, nPos_imp >= 3 & nPos_meas >= 3)
 ATC = subset(RC, category=='ATC' & outcome %in% c('L','C','D')) 
 Targets = subset(RC, category == 'Target')
 
-save(RC, ATC, Targets, file=ResultsDir('classification/2017-07-30-03-47-00/RC.RData'))
+save(RC, ATC, Targets, file=ResultsDir('ATC_and_target_prediction/RC.RData'))
 
 

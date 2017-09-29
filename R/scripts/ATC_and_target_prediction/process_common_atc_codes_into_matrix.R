@@ -1,7 +1,7 @@
 
 # I will just identify the top 6 ATC codes associated with drugs in the large tensor
 L = GetLincsAnnot()
-load('~/projects/side_info/data/annot/tensor_annot.RData')
+load(DataDir('metadata/tensor_annot.RData'))
 A = L[L$pert_id %in% annot$pertIds,]
 
 atc = Str2Vec(na.omit(A$atc_code), split='[|]')

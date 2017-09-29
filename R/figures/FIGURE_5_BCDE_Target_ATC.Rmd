@@ -9,7 +9,7 @@ output:
 ---
 
 ```{r setup, echo=FALSE}
-knitr::opts_knit$set(root.dir = '../../')
+knitr::opts_knit$set(root.dir = '../../../')
 ```
 
 ```{r setup2, echo=FALSE, message=FALSE, warning=FALSE}
@@ -38,7 +38,7 @@ FilterByAUC = function(df, threshold=0.5){
 
 Load the results
 ```{r load_data}
-load('../results/classification/2017-07-30-03-47-00/results_ROC_counts_params.RData')
+load(ResultsDir('ATC_and_target_prediction/results_ROC_counts_params.RData'))
 ```
 
 Do some processing...
@@ -84,7 +84,8 @@ print(sprintf('%d out of %d increased AUC', nPos, nTot))
 #### Analysis of results per model
 Plot distributions.
 ```{r deltas_per_model}
-print(ggplot(Rmeas, aes(x=model, y=diff, group=model, fill=model)) + geom_boxplot() + ggtitle('Improvement in AUC per model') + stat_compare_means())
+print(ggplot(Rmeas, aes(x=model, y=diff, group=model, fill=model)) +
+        geom_boxplot() + ggtitle('Improvement in AUC per model') + stat_compare_means())
 ```
 
 Check significance of deltas per model.
@@ -98,7 +99,8 @@ numSigs = c(MCF7=1505, VCAP=1368, PC3=1340, A375=1168, A549=1139,
             HA1E=1127, HT29=1022, HCC515=934, HEPG2=798, NPC=441)
 Rmeas$num_sigs = numSigs[Rmeas$feature]
 
-ggplot(Rmeas, aes(x=reorder(feature, -diff, FUN=median), y=diff, group=feature, fill=num_sigs)) +  geom_hline(yintercept = 0, color='grey', lwd=1) +
+ggplot(Rmeas, aes(x=reorder(feature, -diff, FUN=median), y=diff, group=feature, fill=num_sigs)) +
+  geom_hline(yintercept = 0, color='grey', lwd=1) +
   geom_boxplot(alpha=0.9) +
   ggtitle(sprintf('Deltas per feature, threshold = %0.1f', threshold)) +
   theme_bw() + ylim(c(-0.5,0.5)) + scale_fill_gradientn(colours=brewer.pal(5,'YlOrRd')) +
@@ -134,7 +136,7 @@ ddply(Rmeas, 'outcome', summarise, median.diff= median(diff))
 ```
 
 ```{r process_q2_data}
-load('../results/classification/2017-07-30-03-47-00/new_ROC_and_counts_with_correct_AUC_imp_values.RData')
+load(ResultsDir('ATC_and_target_prediction/new_ROC_and_counts_with_correct_AUC_imp_values.RData'))
 
 Outcome2Category = function(outcome){
   return(sapply(as.character(outcome), function(x) unlist(strsplit(x, split='[.]'))[[1]]))
@@ -165,7 +167,6 @@ print(sprintf('After filtering by num labels >= 3, %d experiments remaining', nr
 
 Targets = subset(RC, category == 'Target')
 ATC = subset(RC, category == 'ATC')
-#save(RC, ATC, Targets, file=ResultsDir('classification/2017-07-30-03-47-00/RC_all_models.RData'))
 ```
 
 Run stats for ATC code prediction:
@@ -178,9 +179,10 @@ Run similar stats for target prediction:
 t.test(Targets$AUC_imp, Targets$AUC_meas, paired=TRUE)
 ```
 
-```{r}
+```{r HT29}
 H = subset(Targets, feature == 'HT29')
-print(sprintf('mean improvement by HT29 imputed signatures: %0.2f', mean(H$AUC_imp - H$AUC_meas)))
+print(sprintf('mean improvement by HT29 imputed signatures: %0.2f',
+              mean(H$AUC_imp - H$AUC_meas)))
 ```
 
 
@@ -200,7 +202,8 @@ Make ATC scatter (Figure 5D):
 ATC$outcome = revalue(ATC$outcome, c('C'='C: Cardiovascular', 'D'='D: Dermatological',
                                      'L'='L: Antineoplastic/Immunomodulatory'))
 ggplot(ATC, aes(x=AUC_meas, y=AUC_imp, color=outcome, label=feature)) + 
-  geom_abline(slope=1, intercept=0, color='DarkGrey', lty='dashed') + geom_point(size=7, alpha=0.6) +
+  geom_abline(slope=1, intercept=0, color='DarkGrey', lty='dashed') + 
+  geom_point(size=7, alpha=0.6) +
   xlim(c(0,1)) + ylim(c(0,1)) +
   geom_text(size=5, color='black', check_overlap=TRUE) + theme_bw() + 
   guides(color=guide_legend(title='ATC Code', nrow=3)) + 
@@ -216,7 +219,8 @@ Make Target scatter (Figure 5E):
 ggplot(Targets, aes(x=AUC_meas, y=AUC_imp, color=outcome, label=feature)) + 
   geom_abline(slope=1, intercept=0, color='DarkGrey', lty='dashed') + geom_point(size=7, alpha=0.6) +
   xlim(c(0,1)) + ylim(c(0,1)) +
-  geom_text(size=5, color='black', check_overlap=TRUE) + theme_bw() + guides(color=guide_legend(title='Target', nrow=2)) +
+  geom_text(size=5, color='black', check_overlap=TRUE) + theme_bw() + 
+  guides(color=guide_legend(title='Target', nrow=2)) +
   xlab('AUC on measured signatures') + ylab('AUC on predicted signatures') + 
     theme(axis.text=element_text(size=18), axis.title=element_text(size=22),
         legend.text=element_text(size=18), legend.title=element_text(size=22),

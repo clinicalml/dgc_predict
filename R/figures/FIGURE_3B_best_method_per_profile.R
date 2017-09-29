@@ -1,15 +1,3 @@
-# 
-# tsize = 'large'
-# 
-# ### Load measured tensor
-# tensors = list(meas=LoadTensorMat(DataDir(sprintf('tensors/%s.mat', tsize)))$tensor)
-# 
-# ### Load cross-validated tensors
-# file = ResultsDir(sprintf('%s/%s_tensor_results.mat', tsize, tsize))
-# tensors$cv = list(mean=h5read(file, '#refs#/b'), mean2=h5read(file,'#refs#/c'),
-#                   dnpp=h5read(file,'#refs#/d'), tensor=h5read(file,'#refs#/e'))
-# #tensors$cv$ensemble = 0.5 * (tensors$cv$dnpp + tensors$cv$tensor)
-# tensors$cv = lapply(tensors$cv, function(tensor){dimnames(tensor) = dimnames(tensors$meas); return(tensor)})
 
 ### Determine which method has better performance per signature
 PCT = laply(tensors$cv, function(tensor) ComputePCTPerSig(tensors$meas, tensor, format='list')$R)
@@ -26,6 +14,3 @@ p = GHeatmap(M, rowLab=FALSE, colLab=TRUE, dims=c('drugs', 'cells'),
   scale_fill_manual(values=colors)
 print(p)
 ggsave(file=PlotDir('best_method_per_drug_cell.eps'), width=7, height=7)
-
-
-

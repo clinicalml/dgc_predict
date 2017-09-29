@@ -48,9 +48,7 @@ for(i in 1:length(percDEG)){
     lines(roc[['mean2']]$fpr, roc[['mean2']]$tpr, col=colors$mean2, lwd=lwd, type='l', lty=lt)
     lines(roc[['dnpp']]$fpr, roc[['dnpp']]$tpr, col=colors$dnpp, lwd=lwd, type='l', lty=lt)
     lines(roc[['tensor']]$fpr, roc[['tensor']]$tpr, col=colors$tensor, lwd=lwd, type='l',lty=lt)
-    #lines(roc[['ensemble']]$fpr, roc[['ensemble']]$tpr, col=colors$ensemble, lwd=lwd, type='l',lty=lt)
     
-    #legend_str = c(legend_str, sprintf('Ensemble, %0.0f%% DEG, AUC=%0.2f', percDEG[i], out[['ensemble']][[i]]$auc))
     legend_str = c(legend_str, sprintf('Tensor, %0.0f%% DEG, AUC=%0.2f', percDEG[i], out[['tensor']][[i]]$auc))
     legend_str = c(legend_str, sprintf('DNPP, %0.0f%% DEG, AUC=%0.2f', percDEG[i], out[['dnpp']][[i]]$auc))
     legend_str = c(legend_str, sprintf('2D-Mean, %0.0f%% DEG, AUC=%0.2f', percDEG[i], out[['mean2']][[i]]$auc))

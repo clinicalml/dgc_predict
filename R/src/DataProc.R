@@ -326,7 +326,7 @@ LoadTensorMat = function(file){
 }
 
 
-LoadTensors = function(tsize='small', print=FALSE, loadMergeAndPred=FALSE){
+LoadTensors = function(tsize='small', print=FALSE){
   library(rhdf5)
   tensors = list()
   

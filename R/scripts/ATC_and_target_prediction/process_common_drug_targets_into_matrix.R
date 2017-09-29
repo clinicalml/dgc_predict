@@ -1,8 +1,7 @@
 
 # I will just identify targets associated with >= 20 drugs in the large tensor
 L = GetLincsAnnot()
-#load('~/projects/side_info/data/annot/tensor_annot.RData')
-load('~/Desktop/Research/LINCS/submission/data/metadata/tensor_annot.RData')
+load(DataDir('metadata/tensor_annot.RData'))
 
 A = L[L$pert_id %in% annot$pertIds,]
 targets_list = Str2Vec(na.omit(A$targets), split=':')

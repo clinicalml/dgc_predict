@@ -1,14 +1,10 @@
-setwd('~/projects/dg/dgc_predict/')
 
-# ### Setup parallelization and load dependencies
+### Setup parallelization and load dependencies
 library(doParallel)
 cl = makeCluster(20)
 registerDoParallel(cl)
 
 options(error=recover)
-library(RSQLite)
-source('R/src/DataProc.R')
-source('R/src/Utils.R')
 
 library(caret)
 set.seed(123)
@@ -20,12 +16,10 @@ models = c('regLogistic', 'parRF', 'knn', 'sda')
 
 ### Setup results dir
 if(!debug){
-  resDir = ResultsDir(paste0('classification/', gsub(Sys.time(), pattern=':| ', replacement='-')))
+  resDir = ResultsDir(paste0('ATC_and_target_prediction/', gsub(Sys.time(), pattern=':| ', replacement='-')))
   MakeDir(resDir)
-  from=paste0(getwd(), '/R/applications/run_binary_classifications.R')
-  stopifnot(file.copy(from=from, to=resDir, overwrite=TRUE))
 }else{
-  resDir = ResultsDir(paste0('classification/debug'))
+  resDir = ResultsDir(paste0('ATC_and_target_prediction/debug'))
 }
 
 ### Load gene expression features. For now, remove concatenated features since
@@ -44,14 +38,13 @@ if(debug){
      L[[i]]$obs = L[[i]]$obs[,1:5]
      L[[i]]$full = L[[i]]$full[,1:5]
   }
-  #Y = Y[,c('Target.CYP2C19','ATC.L')]
   Y = Y[,c(1, 19, 25)]
 }
 
 ### Setup caret parameters
 fitControl = trainControl(number=10, repeats=1, classProbs=TRUE, allowParallel=TRUE,
                           summaryFunction=twoClassSummary, savePredictions='final', 
-                          method='cv')#ifelse(debug, 'LOOCV', 'cv'))
+                          method='cv')
 
 pGrid = list()
 if(debug){
@@ -107,13 +100,6 @@ for(y in colnames(Y)){
            roc = list(eval_all = ComputeAUC(est = out$pred[names(lab_v),'pos'], lab=lab_v, na.rm=TRUE),
                      eval_meas = ComputeAUC(est = out$pred[meas,'pos'], lab=lab_v[meas], na.rm=TRUE))
            
-           # if(subset == 'full'){
-           #   X_cv = L[[f]]$cv[meas,]
-           #   pred = predict(out, X_cv, type = "prob")
-           #   roc$eval_imp = ComputeAUC(est=pred$pos, lab=lab_v[meas], na.rm=TRUE)
-           #   print(sprintf('  ROC = %0.2f (imp)', roc$eval_imp))
-           # }
-       
            prms = out$bestTune
            OUT[[y]][[f]][[subset]][[model]] = out
            print(sprintf('  ROC = %0.2f (all), %0.2f (meas)', roc$eval_all, roc$eval_meas))
@@ -132,16 +118,6 @@ for(y in colnames(Y)){
   print('...done!')
 }
 
-###########################  TEST  ################################
-
-# if(debug){
-#   load(sprintf('%s/sda%s.RData', resDir, ifelse(debug, '_debug', '')))
-#   stopifnot(unlist(compare::compare(ROC, ROC_save, allowAll = TRUE)$result))
-#   stopifnot(unlist(compare::compare(params, params_save, allowAll = TRUE)$result))
-#   print('Test passed')
-# }
-
-
 ### Copy this script to the results dir
-from=paste0(getwd(), '/R/applications/run_binary_classifications.R')
+from=paste0(getwd(), '/R/scripts/ATC_and_target_prediction/run_binary_classifications.R')
 stopifnot(file.copy(from=from, to=resDir, overwrite=TRUE))
