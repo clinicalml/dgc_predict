@@ -1,6 +1,10 @@
 *.RData
 *.mat
 *.tif
+*.tiff
+*.eps
+*.svg
+*.pdf
 *.html
 *.png
 *.ai
