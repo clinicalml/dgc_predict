@@ -19,3 +19,4 @@ MatlabServer.m
 data
 results
 *.tar
+config.txt
