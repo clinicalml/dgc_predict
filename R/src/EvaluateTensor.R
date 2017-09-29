@@ -1,3 +1,4 @@
+# Preservation of gene-gene correlations between true and predicted tensors
 ComputeGCP = function(T_meas, T_pred_list, plot=FALSE, subset='cv', file=NA, print=TRUE){
   G_meas = ComputeGeneGeneCor(T_meas, cellSpecific=TRUE, print=print)
   G_pred_list = lapply(T_pred_list, function(tensor) ComputeGeneGeneCor(tensor, cellSpecific=TRUE, print=print))
@@ -15,11 +16,13 @@ ComputeGCP = function(T_meas, T_pred_list, plot=FALSE, subset='cv', file=NA, pri
   return(GCP)
 }
 
+# Overall pearson correlation with the truth
 ComputePCT = function(T_meas, T_pred){
   list[x_meas, x_pred] = Tensor2Vec(T_meas, T_pred)
   return(cor(x_meas, x_pred))
 }
 
+# Pearson correlation with truth for each entity in the tensor (drug, gene cell)
 ComputePCT_AllModes = function(T_meas, T_pred_list){
   
   list[nDrug,nGene,nCell] = dim(T_meas)
@@ -46,6 +49,7 @@ ComputePCT_AllModes = function(T_meas, T_pred_list){
   return(list(PCTd=PCTd, PCTg=PCTg, PCTc=PCTc))
 }
 
+# Correlation between true and predicted per signature (= profile)
 ComputePCTPerSig = function(T1, T2, format='df'){
   stopifnot(identical(dim(T1), dim(T2)))
   nDrug = dim(T1)[1]
@@ -77,7 +81,7 @@ ComputePCTPerSig = function(T1, T2, format='df'){
   return(out)
 }
 
-
+# Convert tensor elements to vectors (for the purposes of computing PCT), with appropriate NA handling
 Tensor2Vec = function(T1, T2){
   x1 = as.vector(T1)
   x2 = as.vector(T2)
@@ -94,6 +98,7 @@ Tensor2Vec = function(T1, T2){
   return(list(x1=x1, x2=x2))
 }
 
+# Compute preservation of cell-specificity between true and predicted tensors
 ComputeCSpPres = function(T_meas, T_pred_list, plot=FALSE, subset='cv', cs_true=NULL, debug=FALSE){
   
   if(is.null(cs_true)){

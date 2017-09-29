@@ -51,14 +51,17 @@ ResultsDir = function(subdir=''){
 
 #### workspace helper functions ####################################################################
 
+# Lists all variables (and not functions) active in current workspace
 LsVars = function(envInt=0){
   setdiff(ls(env=sys.frame(envInt)), lsf.str(env=sys.frame(envInt)))
 }
 
+# Lists all functions (and not variables) active in current workspace
 LsFcns = function(envInt=0){
   lsf.str(env=sys.frame(envInt))
 }
 
+# Returns variable name as a string
 GetVarName = function(var){
   return(deparse(substitute(var)))
 }
@@ -67,6 +70,9 @@ GetVarName = function(var){
 
 "%ni%" = Negate("%in%")
 
+# Check whether partitionList is a partition of the fullSet, i.e. that the union
+# of all elements is equal to fullSet, and that nothing is duplicated in
+# partitionList
 IsPartition = function(partitionList, fullSet){
   isPartition = TRUE
   
@@ -89,6 +95,7 @@ IsPartition = function(partitionList, fullSet){
   return(isPartition)
 }
 
+# Check whether there is any intersection between two sets
 IsIntersection = function(setA, setB){
   isIntersection = FALSE
   if(length(intersect(setA, setB))>0){
@@ -127,6 +134,8 @@ GetMultiples = function(x, k=2){
 
 #### math/stats stuff ##############################################################################
 
+# Perform a fisher exact test between two sets A and B. If n_hypotheses is > 1,
+# will perform simple Bonferonni correction
 FisherExact = function(A, B, n_universe=length(union(A,B)), n_hypotheses=1, printFlag=T, alternative='greater'){
   aa = length(intersect(A, B))
   bb = length(setdiff(A, B))
@@ -142,6 +151,8 @@ FisherExact = function(A, B, n_universe=length(union(A,B)), n_hypotheses=1, prin
   return(list(p=p, adjp=min(p*n_hypotheses, 1), overlap=aa))
 }
 
+# Compute cosine distance between two vectors. Only set normalize to FALSE if
+# the vectors already have L2 norm of 1.
 CosineDistance = function(x, y, normalize=TRUE, na.rm=TRUE){
   if(na.rm && normalize){
     idx1 = which(!is.na(x))
@@ -188,6 +199,7 @@ CosineDistanceMatrix = function(M, normalize=TRUE, asVector=FALSE, fullMatrix=FA
   return(1-D)
 }
 
+# (Linearly) rescale elements of vector x to have range [a,b]
 RescaleVec = function(x, a=0, b=1, abs=TRUE){
   if(abs){
     x = abs(x)
@@ -197,6 +209,7 @@ RescaleVec = function(x, a=0, b=1, abs=TRUE){
   return(y)
 }
 
+# Compute Jaccard index of two binary vectors
 JaccardIndex = function(binary_vec1, binary_vec2){
   stopifnot(length(binary_vec1) == length(binary_vec2))
   
@@ -206,18 +219,22 @@ JaccardIndex = function(binary_vec1, binary_vec2){
   return(JaccardIndex_fromIdx(idx1,idx2))
 }
 
+# Compute Jaccard Index from two integer lists
 JaccardIndex_fromIdx = function(idx1, idx2){
   A_intersect_B = length(intersect(idx1, idx2))
   A_union_B = length(union(idx1, idx2))
   return(A_intersect_B / A_union_B)
 }
 
+# Standardize vector x
 ZScore = function(x){
   return( (x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE))
 }
 
 #### data frame helper functions ###################################################################
 
+# Find elements of data frame that are the character vector 'NA', and convert to
+# an actual NA element
 FixNAStrings = function(df, printFlag=FALSE){
   for(i in 1:ncol(df)){
     idx = which(df[,i] == 'NA')
@@ -230,6 +247,8 @@ FixNAStrings = function(df, printFlag=FALSE){
   return(df)
 }
 
+# Change data frame column name. 'from' and 'to' can either be single strings,
+# or vectors of strings
 ChangeColumnName = function(df, from, to){
   
   stopifnot(length(from) == length(to))
@@ -247,24 +266,28 @@ ChangeColumnName = function(df, from, to){
   return(df)
 }
 
+# Remove selected columns from data frame and maintain structure as a df
 RemoveDfColumns = function(df, columnNames){
   stopifnot(all(columnNames %in% names(df)))
   idx = which(names(df) %in% columnNames)
   return(df[,-idx, drop=F])
 }
 
+# Remove selected rows from a data frame
 RemoveDfRows = function(df, rowNames){
   stopifnot(all(rowNames %in% rownames(df)))
   idx = which(rownames(df) %in% rowNames)
   return(df[-idx,])
 }
 
+# Convert all factor columns of data frame to character
 Factor2Char = function(df){
   idx = sapply(df, is.factor)
   df[idx] = lapply(df[idx], as.character)
   return(df)
 }
 
+# Any rows that are duplicated in any of the list <colNames> are removed.
 RemoveDuplicateRowsMulti = function(df, colNames){
   for(colName in colNames){
     df = RemoveDuplicateRows(df, colName)
@@ -272,6 +295,8 @@ RemoveDuplicateRowsMulti = function(df, colNames){
   return(df)
 }
 
+# Remove *all* rows from df that are duplicated in colName. If you want to keep
+# one of the duplicates, use CollapseDuplicateRows.
 RemoveDuplicateRows = function(df, colName){
   x =  df[,colName]
   dups = unique(x[duplicated(x)])
@@ -284,6 +309,7 @@ RemoveDuplicateRows = function(df, colName){
   return(out)
 }
 
+# Any rows that are duplicated in colName are collapsed into a single row in the output df.
 CollapseDuplicateRows = function(df, colName){
   x = df[,colName]
   idxDups = which(duplicated(x))
@@ -295,6 +321,7 @@ CollapseDuplicateRows = function(df, colName){
   return(out)
 }
 
+# Merge a list of data frames into a single data frame
 MergeDfList = function(dfList, by, allRows=TRUE, allSuffixes=TRUE){
   if(allSuffixes){
     for(i in 1:length(dfList)){
@@ -306,6 +333,11 @@ MergeDfList = function(dfList, by, allRows=TRUE, allSuffixes=TRUE){
   return(FixNAStrings(mergedDf))
 }
 
+# Compare two data frames in a way that gives you more information than just
+# whether they are identical or not. This function restricts the data frames to
+# columns that they both share. Can also select a column on which to order the
+# rows of the two data frames (via matchName). maxThresh and normThresh allow
+# some tolerance in performing numerical comparisons. See code for details.
 CompareDfSubset = function(df1, df2, colNames=intersect(names(df1), names(df2)), matchName=NULL, 
                             printFlag=T, maxThresh=0, normThresh=0){
   
@@ -345,6 +377,7 @@ CompareDfSubset = function(df1, df2, colNames=intersect(names(df1), names(df2)),
   return(list(same=same, badNames=badNames, goodNames=goodNames, namesA=namesA, namesB=namesB))
 }
 
+# Compute mean and standard deviation from data frame (was written for plotting purposes)
 DataSummary = function(data, varname, groupnames){
   summary_func = function(x, col){
     c(mean = mean(x[[col]], na.rm=TRUE),
@@ -354,12 +387,14 @@ DataSummary = function(data, varname, groupnames){
   return(data_sum)
 }
 
+# Write to XLS spreadsheet
 Write2XLS = function(dfnames, file, AdjWidth=TRUE, rownames=FALSE, colnames=TRUE){
   library(WriteXLS)
   WriteXLS(dfnames, row.names=rownames, col.names=colnames, AdjWidth=AdjWidth, FreezeCol=0, FreezeRow=1, BoldHeaderRow = TRUE,
            ExcelFileName=file)
 }
 
+# Read from XLS spreadsheet
 ReadXLS = function(filename, sheetname=NULL) {
   sheets = readxl::excel_sheets(filename)
   x = lapply(sheets, function(X) readxl::read_excel(filename, sheet = X))
@@ -382,15 +417,18 @@ ReadXLS = function(filename, sheetname=NULL) {
 
 #### miscellaneous #################################################################################
 
+# Evaluate string as expression
 Eval = function(string){
   return(eval(parse(text=string)))
 }
 
+# Generate a list of unique strings of size n, using different permutations of the alphabet
 AlphaNames = function(n){
   stopifnot(n <= 26^2)
   return(as.character(levels(interaction(letters, LETTERS)))[1:n])
 }
 
+# Convert list of strings into a list of list of strings, splitting on 'split' argument. 
 Str2Vec = function(strings, split=',', unique=FALSE){
   if(unique){
     out = lapply(strings, function(x) unique(unlist(strsplit(x, split=split))))
@@ -406,12 +444,16 @@ Str2Vec = function(strings, split=',', unique=FALSE){
   return(out)
 }
 
+# Convert linear indices into array indices (row and column). Be careful with
+# this, it may not be correct.
 Ind2Sub = function(num.columns, ind){
   c = ((ind-1) %% num.columns) + 1
   r = floor((ind-1) / num.columns) + 1
   return(cbind(r,c))
 }
 
+# Input two integers and get a strictly increasing sequence from 'from' to 'to'.
+# This is different from the result of from:to.
 IncreasingSequence = function(from, to){
   if (to >= from){
     out = from:to
@@ -421,6 +463,8 @@ IncreasingSequence = function(from, to){
   return(out)
 }
 
+# Identify which rows of matrix M have variance larger than some quantile
+# threshold. The smaller the input 'quantile', the more rows will be returned.
 GetVarianceQuantile = function(M, quantile){
   v = rowVars(M)
   idx = which(v > quantile(v, probs=(1-quantile)))
@@ -428,16 +472,19 @@ GetVarianceQuantile = function(M, quantile){
   return(idx)
 }
 
+# identify the top K rows of matrix M with the largest variance
 GetVarianceTopK = function(M, k){
   v = rowVars(M)
   return(which(rank(-v) <= k))
 }
 
+# Identify top K rows of Matrix M with the largest median values
 GetMedianTopK = function(M, k){
   m = rowMedians(M)
   return(which(rank(-m) <= k))
 }
 
+# Check whether matrix A is (approximately) symmetric
 IsSymmetric = function(A, thresh=1e-12){
   symmetric = TRUE
   if(nrow(A) != ncol(A)){
@@ -452,10 +499,12 @@ IsSymmetric = function(A, thresh=1e-12){
 
 #### vector manipulation functions #################################
 
+# Compute L2 norm
 Norm2 = function(x, na.rm=TRUE){
   return(sqrt(sum(x^2, na.rm=na.rm)))
 }
 
+# Compare two vectors with some error tolerance to see if they are equal.
 VectorCompare = function(x, y, normThresh=1e-12, maxThresh=NULL){
   isSame = TRUE
   if((length(x) != length(y)) || (is.na(x) != is.na(y)) || 
@@ -498,11 +547,14 @@ VectorCompare = function(x, y, normThresh=1e-12, maxThresh=NULL){
   return(isSame)
 }
 
+# Identify locations of all elements that are not unique
 FindAllDuplicates = function(v){
   return(which(duplicated(v) | duplicated(v, fromLast=TRUE)))
 }
 
 #### matrix manipulation functions #################################
+
+# Convert data type of matrix without letting R stupidly convert it to a vector 
 MatrixCast = function(M, type){
   out = t(apply(M, 1, eval(parse(text=paste0('as.', type)))))
   stopifnot(dim(out) == dim(M))
@@ -511,9 +563,10 @@ MatrixCast = function(M, type){
   return(out)
 }
 
+# Copy elements from upper triangle to lower triangle. Useful e.g. when computing pairwise comparisons across n elements, so that you don't have to compute each comparison twice.
 SymmetrifyMatrix = function(M, diag=NA){
   if(nrow(M) != ncol(M)){
-    warning('matrix is not symmetric, cannot symmetrify')
+    warning('matrix is not square, cannot symmetrify')
     out = M
   }else{
     M[is.na(M)] = 0
@@ -527,10 +580,14 @@ SymmetrifyMatrix = function(M, diag=NA){
   return(out)
 }
 
+# Get upper triangle part of matrix and vectorize it
 GetUpperTriVec = function(M){
   return(as.vector(M[upper.tri(M, diag = FALSE)]))
 }
 
+# Elementwise correlation between two matrices, either only considering upper
+# triangle (if symmetric = TRUE, e.g. if you are comparing two correlation
+# matrices), or the entire matrix.
 MatrixCor = function(M1, M2, symmetric=TRUE){
   stopifnot(dim(M1) == dim(M2))
   if(symmetric){
@@ -540,6 +597,7 @@ MatrixCor = function(M1, M2, symmetric=TRUE){
   return(cor(as.vector(M1), as.vector(M2), use='pairwise'))
 }
 
+# Apply MatrixCor to lists of matrices
 CorMatrixList = function(list1, list2){
   stopifnot(length(list1) == length(list2))
   out = sapply(1:length(list1), function(i) MatrixCor(list1[[i]], list2[[i]]))
@@ -547,6 +605,7 @@ CorMatrixList = function(list1, list2){
   return(out)
 }
 
+# Compute ordering rows of M via a hierarchical clustering
 ClusterRows = function(M){
   hcr = hclust(dist(M))
   ddr = as.dendrogram(hcr)
@@ -556,10 +615,12 @@ ClusterRows = function(M){
   return(rowInd)
 }
 
+# Compute ordering of columns of M via hierarchical clutsering
 ClusterCols = function(M){
   return(ClusterRows(t(M)))
 }
 
+# Compute ordering of both rows and columns of M via hierarchical clustering
 ClusterRowsAndCols = function(M){
   return(list(rowInd=ClusterRows(M), colInd=ClusterCols(M)))
 }

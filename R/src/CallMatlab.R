@@ -11,6 +11,8 @@ StartMatlab = function(mat = get0('matlab')){
   return(mat)
 }
 
+
+# For details on inputs, see matlab functions GetArgs and CompleteTensor
 CompleteTensor = function(matlab, tensor, method){
   setVariable(matlab, method=method, T=tensor)
   evaluate(matlab, 'args = GetArgs(method, [], [], size(T));')
@@ -20,8 +22,9 @@ CompleteTensor = function(matlab, tensor, method){
   return(out)
 }
 
+# For details on inputs, see matlab function TensorCV
 CrossValidateTensor = function(matlab, tensor, methods=c('mean','mean2', 'knnd', 'fa_lrtc'),
-                               exp_name='test', nFolds=10, maxFolds=10, saveFile=FALSE){
+                               exp_name='test', nFolds=10, maxFolds=10){
   setVariable(matlab, methods=methods, tensor=tensor, exp_name=exp_name, nFolds=nFolds, maxFolds=maxFolds)
   evaluate(matlab, '[cvTensors, PCT, PCTf] = TensorCV(methods, tensor, exp_name, nFolds, maxFolds);')
   out = getVariable(matlab, 'cvTensors')$cvTensors

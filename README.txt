@@ -34,3 +34,13 @@ regenerate_all_figures_from_paper.R. This reruns some of the computations, but s
 
 ** FIGURES **
 All figures should be automatically written to the plot directory (defined in your config file). 
+
+
+** DATA **
+The code interacts with lots of different datasets and files, all available at goo.gl/nTy8sH. After untarring, you should have a 'data' and 'results' directory. You can place these wherever you like, just make sure you point to these directories in the config.txt file.
+
+The data tensors (both the small and large tensors referred to in the paper) are included, in data/tensors/[large/small].mat. 
+
+The cross-validated tensors are available in results/<sz>/<sz>_tensor_cv_results.mat, where sz is either small or large.
+
+The final completed tensors are available for the larger tensor, in results/large/final_pred. 

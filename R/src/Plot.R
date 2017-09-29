@@ -232,7 +232,7 @@ CellSpecScatter = function(x, y, method, diag=TRUE,
   print(p)
 }
 
-
+# Preservation of cell-specificity
 PlotCSP = function(cs_true, cs_pred, subset=''){
   nDrug = length(cs_true)
   method = as.factor(rep(c('1D-Mean', '2D-Mean', 'DNPP', 'Tensor'), each=nDrug))

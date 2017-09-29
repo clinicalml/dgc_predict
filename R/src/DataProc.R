@@ -1,20 +1,27 @@
 library(ROCR)
 
+# Restrict/reorder the dimensions of the second argument to those of the first
+# argument. Both should be 3-dimensional tensors, and it is assumed that the
+# second tensor contains at least all of the dimensions of the first.
 SubsetTensorDims = function(tensorWithDesiredDims, tensorToSubset){
   return(tensorToSubset[dimnames(tensorWithDesiredDims)[[1]], 
                         dimnames(tensorWithDesiredDims)[[2]],
                         dimnames(tensorWithDesiredDims)[[3]]])
 }
 
+# Extract one slice of the tensor corresponding to a chosen drug. The drug
+# reference can be named or just an index.
 GetDrugSlice = function(tensor, drug){
   return(t(na.omit(t(tensor[drug,,]))))
 }
 
+# Annotation and metadata (e.g. targets, side effects) for all compounds in LINCS L1000
 GetLincsAnnot = function(){
   load(DataDir('metadata/lincsAnnot.RData'))
   return(L)
 }
 
+# Normalize each gene profile (or the second dimension) to have L2 norm of 1
 NormSigs = function(A){
   for(i in 1:nrow(A)){
     for(j in 1:dim(A)[3]){
@@ -24,12 +31,16 @@ NormSigs = function(A){
   return(A)
 }
 
+# Observation density in the tensor. Assumes the pattern of missing entries is
+# consistent across all genes, i.e. each drug/cell combination is either
+# completely observed or completely absent.
 ComputeDensity = function(tensor){
   numPresent = NumSigs(tensor)
   numPossible = dim(tensor)[1]*dim(tensor)[3]
   return(numPresent/numPossible)
 }
 
+# Gene information for 978 landmark genes
 GetLmGenes = function(type='symbol'){
   file = DataFile('metadata/L1000_CD_landmark_geneInfo.txt')
   lmGeneInfo = Factor2Char(read.table(file, header=TRUE, sep='\t'))
@@ -48,12 +59,14 @@ GetLmGenes = function(type='symbol'){
   return(out)
 }
 
+# Map gene entrez ID to Uniprot ID
 MapEntrez2Uniprot = function(){
   x = org.Hs.egUNIPROT
   mapped_genes = mappedkeys(x) 
   return(as.list(x[mapped_genes]))
 }
 
+# Map gene entrez ID to Hugo ID
 MapEntrez2Hugo = function(entrez_ids){
   if(!all(is.na(entrez_ids))){
     load(DataDir('metadata/hgnc_to_entrez.RData'))
@@ -68,6 +81,7 @@ MapEntrez2Hugo = function(entrez_ids){
   return(out)
 }
 
+# Map Entrez ID to HGNC symbol
 MapEntrezToSymbol = function(entrez_ids, lm, map=NA){
   if(is.na(map)){
     if(lm){
@@ -84,6 +98,7 @@ MapEntrezToSymbol = function(entrez_ids, lm, map=NA){
   return(map$gene_symbol[idx])
 }
 
+# Map Uniprot id to entrez
 MapUniprot2Entrez = function(proteins, printFlag=TRUE, collapse=FALSE){
   map = MapEntrez2Uniprot()
   p2e = list()
@@ -106,10 +121,13 @@ MapUniprot2Entrez = function(proteins, printFlag=TRUE, collapse=FALSE){
   return(as.character(p2e))
 }
 
+# Get full path to file under data directory
 DataFile = function(file){
   return(paste0(GetConfig('DATAPATH'),'/',file))
 }
 
+# Compute the number of observed profiels in the tensor, assuming the
+# column-structured pattern of missing entries
 NumSigs = function(T, dim='all'){
   if(dim == 'all'){
     A = T[,1,]
@@ -124,11 +142,12 @@ NumSigs = function(T, dim='all'){
   return(out)
 }
 
+# Unfold the tensor along the chosen dimension to generate a matrix.
 UnfoldTensor = function(X, dim=1){
   return(wrap(X, map=list(dim,NA)))
 }
 
-# standardize tensor values per gene
+# Standardize tensor values per gene
 TensorZ = function(X, m=NULL, v=NULL){
   if(is.null(m)){
     m = apply(X, 2, function(x) mean(x, na.rm=TRUE))
@@ -143,7 +162,9 @@ TensorZ = function(X, m=NULL, v=NULL){
   return(list(Z=Z,m=m,v=v))
 }
 
-
+# Takes input tensor X and labels each observation as differentially expressed
+# or not (1 = up-reg, -1=down, 0=unchanged). Output p is the percent of
+# observations labeled as DEG
 TensorDEG = function(X, normGene=FALSE, method='tensor', percDEG=2, symmetric=FALSE){
   if(all(c('drug', 'gene', 'cell') %in% names(dimnames(X)))){
     X = aperm(X, c('drug','gene', 'cell'))
@@ -182,8 +203,8 @@ TensorDEG = function(X, normGene=FALSE, method='tensor', percDEG=2, symmetric=FA
   return(list(D=D, p=p_actual))
 }
 
-# x is a gene expression profile
-# p is the percentile threshold (between 0 and 1)
+# x is a gene expression profile (i.e. a vector) p is the percentile threshold
+# (between 0 and 1). Larger p corresponds to fewer genes being labeled as DEGs.
 CallDEG = function(x, p, symmetric=FALSE){
   d = x
   d[which(!is.na(x))] = 0
@@ -204,6 +225,8 @@ CallDEG = function(x, p, symmetric=FALSE){
   return(d)
 }
 
+# Compute AUC from some estimated scores in 'est', comparing to the true labels
+# (should be the same length), Can also compute ROC curves to be plotted.
 ComputeAUC = function(est, labels, computeROC=FALSE, abs=TRUE, na.rm=FALSE){
   if(na.rm){
     idxNA = which(is.na(est))
@@ -219,7 +242,10 @@ ComputeAUC = function(est, labels, computeROC=FALSE, abs=TRUE, na.rm=FALSE){
     warning(sprintf('labels have %d unique entries, should have 2', length(unique(labels))))
     out = NA
   }else{
-    if(abs){est = abs(est)}
+    if(abs){
+      est = abs(est)
+      warning('Taking absolute value before computing AUC')
+    }
     pred = prediction(est,labels)
     auc = performance(pred, measure = "auc")
     if(computeROC){
@@ -233,6 +259,10 @@ ComputeAUC = function(est, labels, computeROC=FALSE, abs=TRUE, na.rm=FALSE){
   return(out)
 }
 
+# Defines cell specificity for each drug in tensor X, based on mean pairwise
+# cosine distances, as described in the paper. If the signatures in the tensor
+# are already normalized, you can save compute time by setting normalize to
+# FALSE.
 ComputeCellSpecificity = function(X, normalize=FALSE){
   nDrug = dim(X)[1]
   nCell = dim(X)[3]
@@ -261,6 +291,8 @@ ComputeCellSpecificity = function(X, normalize=FALSE){
   return(list(cs=cs, r=r))
 }
 
+# Compute gene gene correlation from tensor, either per cell type (if
+# cellSpecific = TRUE), or across all cell types
 ComputeGeneGeneCor = function(tensor, nGene=dim(tensor)[2], cellSpecific=FALSE, print=TRUE){
   geneIds = dimnames(tensor)[[2]][1:nGene]
   
@@ -287,6 +319,7 @@ ComputeGeneGeneCor = function(tensor, nGene=dim(tensor)[2], cellSpecific=FALSE, 
   return(out)
 }
 
+# Converts tensor values into ranked gene lists per gene expression profile
 RankSigs = function(tensor){
   if(any(tensor < 0, na.rm=TRUE)){
     warning('Did you want to take absolute value?')
@@ -302,6 +335,7 @@ RankSigs = function(tensor){
   return(tensor)
 }
 
+# Verify that pattern of missing entries in the tensor is column-structured
 CheckColumnStructure = function(tensor){
   columnStructured = TRUE
   A = is.na(tensor[,1,])
@@ -315,6 +349,7 @@ CheckColumnStructure = function(tensor){
   return(columnStructured)
 }
 
+# Load tensor from .mat file
 LoadTensorMat = function(file){
   out = readMat(file)
   tensor = out$T
@@ -325,7 +360,7 @@ LoadTensorMat = function(file){
   return(list(tensor=tensor, pertIds=pertIds, geneIds=geneIds, cellIds=cellIds))
 }
 
-
+# Load measured tensor as well as cross-validated tensor values for all four methods presented in the paper
 LoadTensors = function(tsize='small', print=FALSE){
   library(rhdf5)
   tensors = list()
@@ -348,11 +383,13 @@ LoadTensors = function(tsize='small', print=FALSE){
   return(tensors)
 }
 
+# Get the landmark Gene ID ordering in the tensor (consistent for all tensors)
 GetGeneIdsTensor = function(){
   load(DataDir('tensors/test/T50_1.RData'))
   return(dimnames(T_meas)[[2]])
 }
 
+# Get vector of method names
 CompletionMethods = function(version='matlab', knn=FALSE){
   if(version == 'matlab'){
     if(knn){methods=c('mean','mean2', 'knnd', 'fa_lrtc')}
