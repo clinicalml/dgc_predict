@@ -16,3 +16,6 @@ matlab/no_git
 *.DS_Store
 InputStreamByteWrapper.class
 MatlabServer.m
+data
+results
+*.tar
