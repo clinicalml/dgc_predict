@@ -8,11 +8,11 @@ tensors = list(meas=LoadTensorMat(DataDir(sprintf('tensors/%s.mat', tsize)))$ten
 names(dimnames(tensors$meas)) = c('drug','gene','cell')
 
 ### Load completed tensor
-tensors$comp = h5read(ResultsDir(sprintf('%s/hdf5/dnpp_final_hdf5.mat', tsize)),'T')
+tensors$comp = h5read(ResultsDir(sprintf('%s/final_pred/dnpp_final_hdf5.mat', tsize)),'T')
 dimnames(tensors$comp) = dimnames(tensors$meas)
 
 ### Load cross-validated tensor
-file = ResultsDir(sprintf('%s/%s_tensor_results.mat', tsize, tsize))
+file = ResultsDir(sprintf('%s/%s_tensor_cv_results.mat', tsize, tsize))
 tensors$cv = h5read(file,'#refs#/d')
 dimnames(tensors$cv) = dimnames(tensors$meas)
 
