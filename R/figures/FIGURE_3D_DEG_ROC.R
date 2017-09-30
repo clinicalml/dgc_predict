@@ -20,7 +20,7 @@ for(i in 1:length(percDEG)){
     print(method)
     tensor = tensors$cv[[method]]
     ranked_tensor = RankSigs(abs(tensor))
-    out[[method]][[i]] = ComputeAUC(as.vector(ranked_tensor[idx]), labels, computeROC=TRUE)
+    out[[method]][[i]] = ComputeAUC(as.vector(ranked_tensor[idx]), labels, computeROC=TRUE, abs=TRUE)
   }
 }
 

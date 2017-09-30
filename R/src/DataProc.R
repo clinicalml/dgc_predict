@@ -227,7 +227,7 @@ CallDEG = function(x, p, symmetric=FALSE){
 
 # Compute AUC from some estimated scores in 'est', comparing to the true labels
 # (should be the same length), Can also compute ROC curves to be plotted.
-ComputeAUC = function(est, labels, computeROC=FALSE, abs=TRUE, na.rm=FALSE){
+ComputeAUC = function(est, labels, computeROC=FALSE, abs=FALSE, na.rm=FALSE){
   if(na.rm){
     idxNA = which(is.na(est))
     idxLab = which(is.na(labels))
@@ -244,7 +244,6 @@ ComputeAUC = function(est, labels, computeROC=FALSE, abs=TRUE, na.rm=FALSE){
   }else{
     if(abs){
       est = abs(est)
-      warning('Taking absolute value before computing AUC')
     }
     pred = prediction(est,labels)
     auc = performance(pred, measure = "auc")

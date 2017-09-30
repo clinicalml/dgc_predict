@@ -73,7 +73,7 @@ for(dim in dim_compute){
     for(method in imputation_methods){
       if(computeAUC){
         if(all(c(0,1) %in% unique(x$DEG))){
-          auc[[method]][[dim]][idx] = ComputeAUC(x[[method]], x$DEG)
+          auc[[method]][[dim]][idx] = ComputeAUC(x[[method]], x$DEG, abs=TRUE)
         }else{
           auc[[method]][[dim]][idx] = NA
         }
