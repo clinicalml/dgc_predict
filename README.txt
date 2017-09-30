@@ -1,4 +1,4 @@
-dgc_predict: This includes code, data and results for the manuscript entitled "Cell-specific prediction of drug-induced gene expression profiles" by Rachel Hodos, et al. Note that 'dgc' stands for drug, gene, and cell.
+dgc_predict: This code contains the source for the manuscript entitled "Cell-specific prediction and application of drug-induced gene expression profiles" by Rachel Hodos, et al. (PSB 2018). It applies and evaluates a variety of methods to complete a partially-observed data tensor, e.g. comprising gene expression profiles corresponding to various drugs, applied in various cellular contexts. Note that 'dgc' stands for drug, gene, and cell.
 
 Author: Rachel Hodos
 Date: September 28, 2017 
