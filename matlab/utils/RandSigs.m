@@ -2,7 +2,7 @@ function [sigs, I, J] = RandSigs(T, n, replace)
 
 %InitRand();
 
-if ~exist('replace')
+if exist('replace') ~= 1
     replace = false;
 end
 
