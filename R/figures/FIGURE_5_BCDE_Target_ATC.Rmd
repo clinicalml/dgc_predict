@@ -9,7 +9,7 @@ output:
 ---
 
 ```{r setup, echo=FALSE}
-knitr::opts_knit$set(root.dir = '../../../')
+knitr::opts_knit$set(root.dir = '../../')
 ```
 
 ```{r setup2, echo=FALSE, message=FALSE, warning=FALSE}
