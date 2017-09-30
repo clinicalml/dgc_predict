@@ -20,14 +20,18 @@ Note that the tensor is assumed to have dimensions of drugs x genes x cell types
 
 ** WHERE TO START **
 
-In R, change you working directory to this one, then run:
+*In R, change you working directory to this one, then run:
 >> source('R/src/init.R')
 
-Note that if you don't want to run all unit tests, do:
+*The following warnings are normal:
+1: replacing previous import ‘igraph::union’ by ‘GSEABase::union’ when loading ‘HTSanalyzeR’ 
+2: In ComputeAUC(est, labels) : Taking absolute value before computing AUC
+
+*Note that if you don't want to run all unit tests, do:
 >> testAll = FALSE
 >> source('R/src/init.R')
 
-Then in R/scripts, see: 
+*Then in R/scripts, see: 
 example_complete_tensor_and_cv.R
 define_data_tensors.R for the code that compiles the Characteristic Direction drug signatures and subsets into the four tensors referred to in the paper.
 regenerate_all_figures_from_paper.R. This reruns some of the computations, but some has been precomputed to save time.
