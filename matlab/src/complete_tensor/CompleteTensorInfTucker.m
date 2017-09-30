@@ -1,5 +1,7 @@
 function [T_model, out] = CompleteTensorInfTucker(T, args)
 
+        warning('The optimization doesnt seem to be working here..')
+        
         % convert T to a tensor object
         T = tensor(T);
 

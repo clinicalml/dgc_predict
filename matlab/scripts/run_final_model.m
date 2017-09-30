@@ -1,9 +1,9 @@
 
-%clear all;
+clear all;
 close all;
 InitRand();
 
-%model = 'fa_lrtc';
+model = 'fa_lrtc';
 T = GetTensor('tsize/large/large');
 
 args = GetArgs(model, [], [], size(T));

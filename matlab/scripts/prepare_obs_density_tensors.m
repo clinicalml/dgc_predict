@@ -13,9 +13,3 @@ for i = 1:(length(n)-1)
     save(filename, 'T', 'pertIds', 'geneIds', 'cellIds');
     end
 end
-
-
-%%
-%count = CountDrugs(X);
-%[sorted_count, count_ordering] = sort(-count);
-%idx = count_ordering(1:n(i));
