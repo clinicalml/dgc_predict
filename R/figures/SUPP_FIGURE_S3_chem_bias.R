@@ -5,6 +5,7 @@ load(DataDir('metadata/tensor_annot.RData'))
 # Compile drug-specific accuracy into a data frame
 acc = data.frame(pert_id = annot$pertIds, mean=C$mean$drug, mean2 = C$mean2$drug, 
                  dnpp = C$dnpp$drug, tensor = C$tensor$drug)
+acc = Factor2Char(acc)
 rownames(acc) = acc$pert_id
 
 # Load ECFP fingerprints
@@ -49,10 +50,6 @@ maxTC[perts]
 # -> So the good results seen for these compounds cannot simply be explained by having a strong cognate in the dataset.
 
 ### Now let's compute overall PCT on subsets restricted by maxTC thresholds
-if(~exists('tensors')){
-  tensors = LoadTensors(tsize='large', print=TRUE)
-}
-
 stopifnot(identical(dimnames(tensors$meas)[[1]], annot$pertIds))
 pct = lapply(seq(0.05, 1.0, 0.05), function(thresh){ print(thresh); lapply(tensors$cv, function(tensor) 
   ComputePCT(tensors$meas[names(which(maxTC <= thresh)),,], tensor[names(which(maxTC <= thresh)),,]))})
