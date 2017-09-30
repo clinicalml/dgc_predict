@@ -1,6 +1,6 @@
 
 
-rng(123);
+rng(123,'twister');
 T = randn(4,3,2);
 toNan = randperm(8, 5);
 
