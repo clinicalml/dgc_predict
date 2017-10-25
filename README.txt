@@ -29,16 +29,15 @@ Note that the tensor is assumed to have dimensions of drugs x genes x cell types
 
 *Note that if you don't want to run all unit tests, do:
 >> testAll = FALSE
->> source('R/src/init.R')
+>> source('R/init.R')
 
 *Then in R/scripts, see: 
 example_complete_tensor_and_cv.R
 define_data_tensors.R for the code that compiles the Characteristic Direction drug signatures and subsets into the four tensors referred to in the paper.
-regenerate_all_figures_from_paper.R. This reruns some of the computations, but some has been precomputed to save time.
+regenerate_all_figures_from_paper.R. This reruns some of the computations, but some have been precomputed to save time.
 
 ** FIGURES **
-All figures should be automatically written to the plot directory (defined in your config file). 
-
+All figures will be automatically written to the plot directory (defined in your config file). 
 
 ** DATA **
 The code interacts with lots of different datasets and files, all available at goo.gl/nTy8sH. After untarring, you should have a 'data' and 'results' directory. You can place these wherever you like, just make sure you point to these directories in the config.txt file.
