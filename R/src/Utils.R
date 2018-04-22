@@ -36,7 +36,8 @@ DateStr = function(){
 
 CheckDir = function(){
   dirs = unlist(strsplit(getwd(), "/"))
-  stopifnot(identical(dirs[length(dirs)], 'dgc_predict'))
+  #stopifnot(identical(dirs[length(dirs)], 'dgc_predict'))
+  stopifnot(identical(dirs[length(dirs)], 'code'))
 }
 
 DataDir = function(subdir=''){

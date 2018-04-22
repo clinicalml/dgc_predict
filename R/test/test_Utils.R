@@ -17,7 +17,8 @@ TestPlotDir = function(){
 
 TestBaseDir =function(){
   dirs =unlist(strsplit(BaseDir(), "/"))
-  stopifnot(identical(dirs[length(dirs)], 'dgc_predict'))
+  #stopifnot(identical(dirs[length(dirs)], 'dgc_predict'))
+  stopifnot(identical(dirs[length(dirs)], 'code'))
 }
 
 TestGetConfig =function(){
